@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
     public void setSpinner(Spinner spin, ArrayList<String> strings){
         ArrayAdapter<String> selectorAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, strings);
         selectorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
