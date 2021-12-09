@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
 
@@ -9,5 +11,75 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <TextView
+            android:id="@+id/ltext1"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:gravity="center_horizontal"
+            android:text="Type in the number and your units and click the button to convert between them!"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/lunit1"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Unit 2"
+            android:inputType="textPersonName"
+            app:layout_constraintBottom_toBottomOf="@+id/litem1"
+            app:layout_constraintEnd_toEndOf="@+id/lunit2"
+            app:layout_constraintStart_toStartOf="@+id/lunit2"
+            app:layout_constraintTop_toTopOf="@+id/litem1" />
+
+        <EditText
+            android:id="@+id/litem2"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Num. 1"
+            android:inputType="textPersonName"
+            app:layout_constraintBottom_toTopOf="@+id/lconvert"
+            app:layout_constraintEnd_toStartOf="@+id/lunit2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/lconvert"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/lunit2"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:ems="10"
+            android:hint="Unit 1"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toEndOf="@+id/lconvert"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/litem2"
+            app:layout_constraintTop_toTopOf="@+id/litem2" />
+
+        <Button
+            android:id="@+id/lconvert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:text="Convert"
+            app:layout_constraintBottom_toBottomOf="@+id/ltext1"
+            app:layout_constraintStart_toEndOf="@+id/ltext1"
+            app:layout_constraintTop_toTopOf="@+id/ltext1" />
+
+        <EditText
+            android:id="@+id/litem1"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Num. 2"
+            android:inputType="textPersonName"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/litem2"
+            app:layout_constraintStart_toStartOf="@+id/litem2"
+            app:layout_constraintTop_toBottomOf="@+id/lconvert" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

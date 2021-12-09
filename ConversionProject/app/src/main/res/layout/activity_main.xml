@@ -13,90 +13,79 @@
         tools:context=".MainActivity">
 
         <TextView
+            android:id="@+id/text1"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="110dp"
+            android:gravity="center_horizontal"
+            android:text="Type in the number and your units and click the button to convert between them!"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/item1"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:ems="10"
+            android:hint="Num. 1"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/unit1"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text1" />
+
+        <EditText
             android:id="@+id/unit1"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:text="TextView"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="32dp"
+            android:ems="10"
+            android:hint="Unit 1"
+            android:inputType="textPersonName"
+            app:layout_constraintBottom_toBottomOf="@+id/item1"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.125" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/item1" />
 
-        <TextView
+        <EditText
+            android:id="@+id/item2"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
+            android:ems="10"
+            android:hint="Num. 2"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toStartOf="@+id/unit2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item1" />
+
+        <EditText
             android:id="@+id/unit2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="TextView"
-            app:layout_constraintEnd_toEndOf="@+id/unit1"
-            app:layout_constraintStart_toStartOf="@+id/unit1"
-            app:layout_constraintTop_toBottomOf="@+id/unit1" />
-
-        <TextView
-            android:id="@+id/unit3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="TextView"
-            app:layout_constraintEnd_toEndOf="@+id/unit2"
-            app:layout_constraintStart_toStartOf="@+id/unit2"
-            app:layout_constraintTop_toBottomOf="@+id/unit2" />
-
-        <TextView
-            android:id="@+id/unit4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="TextView"
-            app:layout_constraintEnd_toEndOf="@+id/unit3"
-            app:layout_constraintStart_toStartOf="@+id/unit3"
-            app:layout_constraintTop_toBottomOf="@+id/unit3" />
-
-        <EditText
-            android:id="@+id/unit1edit"
             android:layout_width="100dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginStart="32dp"
             android:ems="10"
+            android:hint="Unit 2"
             android:inputType="textPersonName"
-            app:layout_constraintEnd_toStartOf="@+id/spinner1"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/unit4" />
-
-        <EditText
-            android:id="@+id/unit2edit"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName"
-            app:layout_constraintEnd_toStartOf="@+id/spinner2"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:layout_editor_absoluteY="424dp" />
-
-        <Spinner
-            android:id="@+id/spinner1"
-            android:layout_width="65dp"
-            android:layout_height="39dp"
-            android:layout_marginStart="16dp"
-            app:layout_constraintBottom_toBottomOf="@+id/unit1edit"
+            app:layout_constraintBottom_toBottomOf="@+id/item2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/unit1edit" />
+            app:layout_constraintStart_toEndOf="@+id/item2" />
 
-        <Spinner
-            android:id="@+id/spinner2"
+        <Button
+            android:id="@+id/convert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:text="Convert"
+            app:layout_constraintBottom_toBottomOf="@+id/item2"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/unit2edit"
-            tools:layout_editor_absoluteY="445dp" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/item1" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
