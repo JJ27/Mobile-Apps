@@ -12,11 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.listviewdemo2.databinding.ActivityMainBinding;
+import com.example.listviewdemo2.databinding.AdapterLayoutBindingImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         List<Reindeer> list;
         Context context;
         int xmlResource;
-        //ActivityMainBinding binding2 = DataBindingUtil.setContentView(MainActivity.CustomAdapter,R.layout.adapter_layout);
 
         public CustomAdapter(@NonNull Context context, int resource, @NonNull List<Reindeer> objects) {
             super(context, resource, objects);
@@ -58,12 +55,9 @@ public class MainActivity extends AppCompatActivity {
             //return super.getView(position, convertView, parent);
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             View adapterLayout = layoutInflater.inflate(xmlResource, null);
+            AdapterLayoutBindingImpl binding2 = DataBindingUtil.inflate(layoutInflater.from(context), R.layout.adapter_layout,parent, false);
 
-            TextView name = adapterLayout.findViewById(R.id.textView);
-            ImageView image = adapterLayout.findViewById(R.id.imageView);
-            Button remove = adapterLayout.findViewById(R.id.button);
-
-            remove.setOnClickListener(new View.OnClickListener() {
+            binding2.button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     list.remove(position);
@@ -71,9 +65,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            name.setText(list.get(position)+" "+position);
-            image.setImageResource(android.R.drawable.btn_star_big_on);
-            return adapterLayout;
+            binding2.textView.setText(list.get(position)+" "+position);
+            binding2.imageView.setImageResource(android.R.drawable.btn_star_big_on);
+            return binding2.getRoot();
         }
     }
 }
