@@ -5,12 +5,14 @@ public class Senator {
     String name;
     String state;
     String party;
+    String lastElection;
 
-    public Senator(int classnum, String name, String state, String party){
+    public Senator(String name, int classnum, String state, String party, String lastElection){
         this.classnum = classnum;
         this.name = name;
         this.state = state;
         this.party = party;
+        this.lastElection = lastElection;
     }
 
     public int getClassNum() {
@@ -27,5 +29,9 @@ public class Senator {
 
     public String getParty() {
         return party;
+    }
+
+    public String getLastElection() {
+        return lastElection;
     }
 }
