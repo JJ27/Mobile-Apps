@@ -4,13 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +26,6 @@ import com.example.listviewproject.databinding.AdapterLayoutBindingImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,12 +46,17 @@ public class MainActivity extends AppCompatActivity {
         try {
             Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/List_of_current_United_States_senators").get();
             Elements senNames = doc.select(".fn a");
-            //Elements senParty = doc.select("")
-            for(int i = 0; i < senNames.size(); i++){
-                senators.add(new Senator(senNames.get(i).text(),2,"NJ","D","51-49"));
+            //Elements senParty = doc.select("");
+            Element table = doc.getElementById("senators");
+            Elements rows = table.select("tr");
+            Elements party = new Elements();
+            for(int i = 1; i < rows.size(); i++){
+                party.add(rows.get(i).select("tr").get(4));
+
             }
-
-
+            for(int i = 0; i < senNames.size(); i++){
+                senators.add(new Senator(senNames.get(i).text(),2,"NJ",party.get(i).text(),"51-49"));
+            }
         } catch (IOException e) {Log.d("IOException", e.toString());}
 
         CustomAdapter adapter = new CustomAdapter(this,R.layout.adapter_layout, senators);
@@ -85,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
             View adapterLayout = layoutInflater.inflate(xmlResource,null);
-            AdapterLayoutBindingImpl binding2 = DataBindingUtil.inflate(layoutInflater.from(context), R.layout.adapter_layout, parent, false);
-            binding2.remove.setOnClickListener(new View.OnClickListener() {
+            AdapterLayoutBindingImpl bindings = DataBindingUtil.inflate(layoutInflater.from(context), R.layout.adapter_layout, parent, false);
+            bindings.remove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     list.remove(position);
@@ -94,9 +96,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            binding2.name.setText(list.get(position).getName());
-            binding2.party.setImageResource((list.get(position).getParty().equals("D")) ? R.drawable.democrat : R.drawable.republican);
-            return binding2.getRoot();
+            bindings.name.setText(list.get(position).getName());
+            bindings.party.setImageResource((list.get(position).getParty().equals("D")) ? R.drawable.democrat : R.drawable.republican);
+            return bindings.getRoot();
         }
     }
 }
