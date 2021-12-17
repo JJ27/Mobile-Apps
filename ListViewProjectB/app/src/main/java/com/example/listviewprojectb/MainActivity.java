@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        binding.listView.setFriction(ViewConfiguration.getScrollFriction() * 2);
+        binding.listView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.5));
     }
 
     @Override
@@ -49,8 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         senators = new ArrayList<Senator>();
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
         try {
             Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/List_of_current_United_States_senators").get();
             ArrayList<String> senNames = new ArrayList<String>();
@@ -119,8 +118,7 @@ public class MainActivity extends AppCompatActivity {
             bindings.remove.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    list.remove(position);
-                    if ((list.get(position).getParty().contains("Republican"))) {
+                    if ((list.remove(position).getParty().contains("Republican"))) {
                         totalr--;
                     } else {
                         totald--;
