@@ -12,6 +12,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,6 +32,13 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     ArrayList<Senator> senators;
+    int totald, totalr;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        binding.listView.setFriction(ViewConfiguration.getScrollFriction() * 2);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/List_of_current_United_States_senators").get();
             ArrayList<String> senNames = new ArrayList<String>();
             ArrayList<Integer> electionyears = new ArrayList<Integer>();
+            ArrayList<String> state = new ArrayList<String>();
             Element table = doc.getElementById("senators");
             Elements rows = table.select("tr");
             ArrayList<String> party = new ArrayList<String>();
@@ -56,17 +65,26 @@ public class MainActivity extends AppCompatActivity {
                     senNames.add(rows.get(i).select("th").get(0).text());
                     party.add(rows.get(i).select("td").get(3).text());
                     electionyears.add(Integer.parseInt(rows.get(i).select("td").get(9).text()));
+                    state.add(rows.get(i).select("td").get(0).text());
                 } else{
                     Log.d("Senator", rows.get(i).select("th").get(0).text());
                     senNames.add(rows.get(i).select("th").get(0).text());
                     party.add(rows.get(i).select("td").get(2).text());
                     electionyears.add(Integer.parseInt(rows.get(i).select("td").get(8).text()));
+                    state.add(rows.get(i-1).select("td").get(0).text());
                 }
             }
             for(int i = 0; i < 100; i++){
-                senators.add(new Senator(senNames.get(i),electionyears.get(i),"NJ",party.get(i),"51-49"));
+                senators.add(new Senator(senNames.get(i).trim(),electionyears.get(i),state.get(i),party.get(i),"51-49"));
+                if ((party.get(i).contains("Republican"))) {
+                    totalr++;
+                } else {
+                    totald++;
+                }
             }
         } catch (IOException e) {Log.d("IOException", e.toString());}
+
+        binding.composition.setText(totald + "-" + totalr);
 
         CustomAdapter adapter = new CustomAdapter(this,R.layout.adapter_layout, senators);
         binding.listView.setAdapter(adapter);
@@ -74,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
         binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                binding.electionyear.setText("Hello");
-                //binding.textView.setText(adapterView.getAdapter().getItem(i).getClass().toString());
+                binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
+                binding.state.setText(senators.get(i).getState());
             }
         });
     }
@@ -102,6 +120,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     list.remove(position);
+                    if ((list.get(position).getParty().contains("Republican"))) {
+                        totalr--;
+                    } else {
+                        totald--;
+                    }
+                    binding.composition.setText(totald + "-" + totalr);
                     notifyDataSetChanged();
                 }
             });
@@ -110,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
             bindings.party.setImageResource((list.get(position).getParty().charAt(0) == 'R') ? R.drawable.republican : R.drawable.democrat);
             return bindings.getRoot();
         }
-
         public List<Senator> getList() {
             return list;
         }
