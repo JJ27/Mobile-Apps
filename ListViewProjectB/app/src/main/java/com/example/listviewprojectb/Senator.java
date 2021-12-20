@@ -7,6 +7,7 @@ public class Senator {
     String party;
     String lastElection;
 
+
     public Senator(String name, int classnum, String state, String party, String lastElection){
         this.classnum = classnum;
         this.name = name;

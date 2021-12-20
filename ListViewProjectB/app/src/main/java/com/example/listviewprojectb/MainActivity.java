@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -37,7 +38,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        binding.listView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.5));
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            binding.listView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.5));
+        else
+            binding.llistView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.5));
     }
 
     @Override
@@ -49,6 +53,37 @@ public class MainActivity extends AppCompatActivity {
 
         senators = new ArrayList<Senator>();
 
+        initialize();
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            binding.composition.setText(totald + "-" + totalr);
+
+            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators);
+            binding.listView.setAdapter(adapter);
+
+            binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
+                    binding.state.setText(senators.get(i).getState());
+                }
+            });
+        } else{
+            //binding.composition.setText(totald + "-" + totalr);
+
+            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators);
+            binding.llistView.setAdapter(adapter);
+
+            binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    //binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
+                    //binding.state.setText(senators.get(i).getState());
+                }
+            });
+        }
+    }
+
+    public void initialize(){
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
         try {
             Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/List_of_current_United_States_senators").get();
@@ -59,42 +94,24 @@ public class MainActivity extends AppCompatActivity {
             Elements rows = table.select("tr");
             ArrayList<String> party = new ArrayList<String>();
             for(int i = 1; i < rows.size(); i++){
+                Log.d("Senator", rows.get(i).select("th").get(0).text());
+                senNames.add(rows.get(i).select("th").get(0).text());
                 if(i % 2 == 1) {
-                    Log.d("Senator", rows.get(i).select("th").get(0).text());
-                    senNames.add(rows.get(i).select("th").get(0).text());
                     party.add(rows.get(i).select("td").get(3).text());
                     electionyears.add(Integer.parseInt(rows.get(i).select("td").get(9).text()));
                     state.add(rows.get(i).select("td").get(0).text());
                 } else{
-                    Log.d("Senator", rows.get(i).select("th").get(0).text());
-                    senNames.add(rows.get(i).select("th").get(0).text());
                     party.add(rows.get(i).select("td").get(2).text());
                     electionyears.add(Integer.parseInt(rows.get(i).select("td").get(8).text()));
                     state.add(rows.get(i-1).select("td").get(0).text());
                 }
-            }
-            for(int i = 0; i < 100; i++){
-                senators.add(new Senator(senNames.get(i).trim(),electionyears.get(i),state.get(i),party.get(i),"51-49"));
-                if ((party.get(i).contains("Republican"))) {
+                senators.add(new Senator(senNames.get(i-1).trim(),electionyears.get(i-1),state.get(i-1),party.get(i-1),"51-49"));
+                if ((party.get(i-1).contains("Republican")))
                     totalr++;
-                } else {
+                else
                     totald++;
-                }
             }
         } catch (IOException e) {Log.d("IOException", e.toString());}
-
-        binding.composition.setText(totald + "-" + totalr);
-
-        CustomAdapter adapter = new CustomAdapter(this,R.layout.adapter_layout, senators);
-        binding.listView.setAdapter(adapter);
-
-        binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
-                binding.state.setText(senators.get(i).getState());
-            }
-        });
     }
 
     public class CustomAdapter extends ArrayAdapter<Senator> {
