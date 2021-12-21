@@ -33,8 +33,11 @@ import com.example.listviewprojectb.databinding.AdapterLayoutBinding;
 import com.example.listviewprojectb.databinding.AdapterLayoutBindingImpl;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -77,7 +80,59 @@ public class MainActivity extends AppCompatActivity {
         } else{
             CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
             binding.llistView.setAdapter(adapter);
-            setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Dem","GOP","2022","2024","2026","")));
+            setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
+            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
+
+            binding.filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    switch(parent.getAdapter().getItem(position).toString()){
+                        case "Default":
+                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
+                            break;
+                        case "Party":
+                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Dem", "GOP")));
+                            break;
+                        case "Class":
+                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("2022", "2024", "2026")));
+                            break;
+                        case "Strength":
+                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Solid", "Likely", "Lean", "Tilt")));
+                            break;
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+
+            binding.filter2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    ArrayList<Senator> newsen = new ArrayList<Senator>(Collections.copy(senators));
+                    switch(parent.getAdapter().getItem(position).toString()){
+                        case "Default":
+                            CustomAdapter adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout, senators, binding, totald, totalr);
+                            binding.llistView.setAdapter(adapter);
+                            break;
+                        case "GOP":
+                            for(Senator s: newsen){
+                                if(!(s.getParty().charAt(0) == 'R'))
+                                    newsen.remove(s);
+                            }
+                            CustomAdapter adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout,newsen, binding, totald, totalr);
+                            binding.llistView.setAdapter(adapter);
+                            break;
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
 
             binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -85,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                     binding.lelectionyear.setText("Next Election: " + senators.get(i).getClassNum());
                     binding.lstate.setText(senators.get(i).getState());
                     binding.lastelec.setText(senators.get(i).getLastElection());
-                    binding.opinion.setText((senators.get(i).getParty().charAt(0) == 'R') ? "Republicans currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. But Manchin's no-vote may kill their chances.");
+                    binding.opinion.setText((senators.get(i).getParty().charAt(0) == 'R') ? "Republicans are currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. However, Manchin's no-vote may kill their chances.");
                 }
             });
         }
