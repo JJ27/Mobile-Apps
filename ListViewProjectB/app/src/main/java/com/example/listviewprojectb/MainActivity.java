@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,6 +34,7 @@ import com.example.listviewprojectb.databinding.AdapterLayoutBindingImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -73,9 +75,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else{
-
             CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
             binding.llistView.setAdapter(adapter);
+            setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Dem","GOP","2022","2024","2026","")));
 
             binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     binding.lelectionyear.setText("Next Election: " + senators.get(i).getClassNum());
                     binding.lstate.setText(senators.get(i).getState());
                     binding.lastelec.setText(senators.get(i).getLastElection());
+                    binding.opinion.setText((senators.get(i).getParty().charAt(0) == 'R') ? "Republicans currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. But Manchin's no-vote may kill their chances.");
                 }
             });
         }
@@ -135,5 +138,10 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (IOException e) {Log.d("IOException", e.toString());}
         return "Hello!";
+    }
+    public void setSpinner(Spinner spin, ArrayList<String> strings){
+        ArrayAdapter<String> selectorAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, strings);
+        selectorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spin.setAdapter(selectorAdapter);
     }
 }

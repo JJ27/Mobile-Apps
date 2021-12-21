@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="TextView"
+            android:text="%"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/llistView"
@@ -35,7 +35,7 @@
             android:id="@+id/electtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="10dp"
             android:text="Last Election Result"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -46,7 +46,7 @@
             android:id="@+id/lelectionyear"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="15dp"
             android:layout_weight="1"
             android:gravity="center"
             android:text="Next Election"
@@ -69,9 +69,9 @@
 
         <TextView
             android:id="@+id/lstate"
-            android:layout_width="33dp"
+            android:layout_width="70dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginBottom="15dp"
             android:layout_weight="1"
             android:gravity="center"
             android:text="State"
@@ -79,5 +79,29 @@
             app:layout_constraintEnd_toStartOf="@+id/lcomposition"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/llistView" />
+
+        <Spinner
+            android:id="@+id/filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/lelectionyear"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/opinion" />
+
+        <TextView
+            android:id="@+id/opinion"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Party Selection"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@+id/filter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/lastelec" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
