@@ -1,5 +1,8 @@
 package com.example.listviewprojectb;
-
+/* NOTE TO SELF: TO FIX UNKNOWN HOSTNAME
+1) Quit emulator app
+2) Re-run emulator
+ */
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +20,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -57,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.composition.setText(totald + "-" + totalr);
 
-            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators);
+            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
             binding.listView.setAdapter(adapter);
 
             binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -70,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         } else{
             //binding.composition.setText(totald + "-" + totalr);
 
-            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators);
+            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
             binding.llistView.setAdapter(adapter);
 
             binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -78,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     //binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
                     //binding.state.setText(senators.get(i).getState());
+                    binding.lastelec.setText(senators.get(i).getLastElection());
                 }
             });
         }
@@ -94,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
             Elements rows = table.select("tr");
             ArrayList<String> party = new ArrayList<String>();
             for(int i = 1; i < rows.size(); i++){
-                Log.d("Senator", rows.get(i).select("th").get(0).text());
                 senNames.add(rows.get(i).select("th").get(0).text());
                 if(i % 2 == 1) {
                     party.add(rows.get(i).select("td").get(3).text());
@@ -106,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
                     state.add(rows.get(i-1).select("td").get(0).text());
                 }
                 senators.add(new Senator(senNames.get(i-1).trim(),electionyears.get(i-1),state.get(i-1),party.get(i-1),"51-49"));
+                senators.get(i-1).setLastElection(getElectionResult(senators.get(i-1)));
+                Log.d("Elec",senators.get(i-1).getLastElection());
                 if ((party.get(i-1).contains("Republican")))
                     totalr++;
                 else
@@ -113,44 +120,20 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (IOException e) {Log.d("IOException", e.toString());}
     }
+    public String getElectionResult(Senator senator){
+        try {
+            Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + senator.getClassNum() + "_United_States_Senate_elections").get();
+            switch (senator.getClassNum()) {
+                case 2022:
+                    Elements tablerow = doc.getElementsByClass("wikitable").get(4).select("tr:contains(" + senator.getName().split(" ")[0]+" "+senator.getName().split(" ")[1] + ")");
+                    return tablerow.select("td").get(2).text().substring(0,5);
+                case 2024:
+                    tablerow = doc.getElementsByClass("wikitable").get(3).select("tr:contains(" + senator.getName().split(" ")[0]+" "+senator.getName().split(" ")[1] + ")");
+                    return tablerow.select("td").get(3).text().substring(0,5);
 
-    public class CustomAdapter extends ArrayAdapter<Senator> {
-        List<Senator> list;
-        Context context;
-        int xmlResource;
 
-        public CustomAdapter(@NonNull Context context, int resource, @NonNull List<Senator> objects){
-            super(context, resource, objects);
-            xmlResource = resource;
-            list = objects;
-            this.context = context;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
-            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            View adapterLayout = layoutInflater.inflate(xmlResource,null);
-            AdapterLayoutBindingImpl bindings = DataBindingUtil.inflate(layoutInflater.from(context), R.layout.adapter_layout, parent, false);
-            bindings.remove.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if ((list.remove(position).getParty().contains("Republican"))) {
-                        totalr--;
-                    } else {
-                        totald--;
-                    }
-                    binding.composition.setText(totald + "-" + totalr);
-                    notifyDataSetChanged();
-                }
-            });
-
-            bindings.name.setText(list.get(position).getName());
-            bindings.party.setImageResource((list.get(position).getParty().charAt(0) == 'R') ? R.drawable.republican : R.drawable.democrat);
-            return bindings.getRoot();
-        }
-        public List<Senator> getList() {
-            return list;
-        }
+            }
+        } catch (IOException e) {Log.d("IOException", e.toString());}
+        return "Hello!";
     }
 }

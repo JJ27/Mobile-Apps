@@ -35,4 +35,8 @@ public class Senator {
     public String getLastElection() {
         return lastElection;
     }
+
+    public void setLastElection(String lastElection) {
+        this.lastElection = lastElection;
+    }
 }
