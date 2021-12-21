@@ -1,5 +1,7 @@
 package com.example.listviewprojectb;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -49,7 +51,6 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
             param.weight = 2.0f;
             bindings.party.setLayoutParams(param);
             bindings.listitem.setWeightSum(7.0f);
-
         }
         bindings.remove.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,7 +60,10 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
                 } else {
                     totald--;
                 }
-                binding.composition.setText(totald + "-" + totalr);
+                if(context.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT)
+                    binding.composition.setText(totald + "-" + totalr);
+                else
+                    binding.lcomposition.setText(totald + "-" + totalr);
                 notifyDataSetChanged();
             }
         });

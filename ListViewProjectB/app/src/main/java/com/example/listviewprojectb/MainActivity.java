@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             binding.listView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.5));
         else
-            binding.llistView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.5));
+            binding.llistView.setFriction((float)(ViewConfiguration.getScrollFriction() * 1.2));
     }
 
     @Override
@@ -57,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main);
 
         senators = new ArrayList<Senator>();
-
-        initialize();
+        if(savedInstanceState == null)
+            initialize();
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.composition.setText(totald + "-" + totalr);
 
@@ -73,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else{
-            //binding.composition.setText(totald + "-" + totalr);
 
             CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
             binding.llistView.setAdapter(adapter);
@@ -81,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
             binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    //binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
-                    //binding.state.setText(senators.get(i).getState());
+                    binding.lelectionyear.setText("Next Election: " + senators.get(i).getClassNum());
+                    binding.lstate.setText(senators.get(i).getState());
                     binding.lastelec.setText(senators.get(i).getLastElection());
                 }
             });
@@ -126,12 +125,13 @@ public class MainActivity extends AppCompatActivity {
             switch (senator.getClassNum()) {
                 case 2022:
                     Elements tablerow = doc.getElementsByClass("wikitable").get(4).select("tr:contains(" + senator.getName().split(" ")[0]+" "+senator.getName().split(" ")[1] + ")");
-                    return tablerow.select("td").get(2).text().substring(0,5);
+                    return (tablerow.select("td").get(2).text().charAt(0) != 'A') ? tablerow.select("td").get(2).text().substring(0,5): tablerow.select("td").get(2).text().substring(0,9);
                 case 2024:
                     tablerow = doc.getElementsByClass("wikitable").get(3).select("tr:contains(" + senator.getName().split(" ")[0]+" "+senator.getName().split(" ")[1] + ")");
                     return tablerow.select("td").get(3).text().substring(0,5);
-
-
+                case 2026:
+                    tablerow = doc.getElementsByClass("wikitable").get(2).select("tr:contains(" + senator.getName().split(" ")[0]+" "+senator.getName().split(" ")[1] + ")");
+                    return tablerow.select("td").get(3).text().substring(0,5);
             }
         } catch (IOException e) {Log.d("IOException", e.toString());}
         return "Hello!";

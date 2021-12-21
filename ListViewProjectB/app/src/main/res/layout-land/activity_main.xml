@@ -24,11 +24,60 @@
             android:id="@+id/lastelec"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="10dp"
             android:text="TextView"
-            android:textSize="24sp"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/electtitle" />
+
+        <TextView
+            android:id="@+id/electtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="Last Election Result"
+            android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/llistView"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lelectionyear"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginBottom="25dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Next Election"
+            app:layout_constraintBottom_toTopOf="@+id/lstate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/llistView" />
+
+        <TextView
+            android:id="@+id/lcomposition"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="50-50"
+            app:layout_constraintBottom_toBottomOf="@+id/lstate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/lstate"
+            app:layout_constraintTop_toTopOf="@+id/lstate" />
+
+        <TextView
+            android:id="@+id/lstate"
+            android:layout_width="33dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="State"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/lcomposition"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/llistView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
