@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 
 import com.example.listviewprojectb.databinding.ActivityMainBinding;
+import com.example.listviewprojectb.databinding.AdapterLayoutBinding;
 import com.example.listviewprojectb.databinding.AdapterLayoutBindingImpl;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
     int xmlResource;
     ActivityMainBinding binding;
     int totald, totalr;
+    AdapterLayoutBindingImpl bindings;
 
     public CustomAdapter(@NonNull Context context, int resource, @NonNull List<Senator> objects, ActivityMainBinding binding, int totald, int totalr){
         super(context, resource, objects);
@@ -42,7 +44,7 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent){
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         View adapterLayout = layoutInflater.inflate(xmlResource,null);
-        AdapterLayoutBindingImpl bindings = DataBindingUtil.inflate(layoutInflater.from(context), R.layout.adapter_layout, parent, false);
+        bindings = DataBindingUtil.inflate(layoutInflater.from(context), R.layout.adapter_layout, parent, false);
         if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             LinearLayout.LayoutParams param = (LinearLayout.LayoutParams)bindings.name.getLayoutParams();
             param.weight = 2.0f;
@@ -74,5 +76,9 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
     }
     public List<Senator> getList() {
         return list;
+    }
+
+    public AdapterLayoutBindingImpl getBinding() {
+        return bindings;
     }
 }

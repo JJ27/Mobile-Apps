@@ -31,6 +31,13 @@ android {
 }
 
 dependencies {
+    implementation ('com.octo.android.robospice:robospice-retrofit:1.4.14') {
+        exclude group: 'org.apache.commons', module: 'commons-io'
+    }
+    implementation ('com.octo.android.robospice:robospice-ormlite:1.4.14') {
+        exclude group: 'org.apache.commons', module: 'commons-io'
+    }
+    implementation 'commons-io:commons-io:2.4'
 
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'com.google.android.material:material:1.4.0'
