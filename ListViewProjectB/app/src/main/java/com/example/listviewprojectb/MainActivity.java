@@ -3,6 +3,9 @@ package com.example.listviewprojectb;
 1) Quit emulator app
 2) Re-run emulator
  */
+import static com.example.listviewprojectb.CustomAdapter.totald;
+import static com.example.listviewprojectb.CustomAdapter.totalr;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -46,7 +49,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     ArrayList<Senator> senators;
-    int totald, totalr;
 
     @Override
     protected void onStart() {
@@ -74,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             binding.composition.setText(totald + "-" + totalr);
 
-            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
+            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr, this);
             binding.listView.setAdapter(adapter);
 
             binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else{
-            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr);
+            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr, this);
             binding.llistView.setAdapter(adapter);
             setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
             setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     ArrayList<Senator> newsen = new ArrayList<Senator>();
                     newsen.addAll(senators);
-                    CustomAdapter adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout, newsen, binding, totald, totalr);
+                    CustomAdapter adapter;
                     switch(parent.getAdapter().getItem(position).toString()){
                         case "Default":
                             newsen = new ArrayList<Senator>(senators);
@@ -161,8 +163,7 @@ public class MainActivity extends AppCompatActivity {
                             newsen.removeIf((Senator s) -> (Double.parseDouble(s.getLastElection().substring(0,4)) > 51.0));
                             break;
                     }
-                    adapter.notifyDataSetChanged();
-                    adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout,newsen, binding, totald, totalr);
+                    adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout,newsen, binding, totald, totalr, MainActivity.this);
                     binding.llistView.setAdapter(adapter);
                 }
 
@@ -250,5 +251,8 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> selectorAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, strings);
         selectorAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spin.setAdapter(selectorAdapter);
+    }
+    public void permanentRemove(Senator s, CustomAdapter adapter){
+        senators.remove(s);
     }
 }
