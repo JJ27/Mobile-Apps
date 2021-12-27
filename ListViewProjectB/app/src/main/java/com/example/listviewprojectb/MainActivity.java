@@ -49,6 +49,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     ArrayList<Senator> senators;
+    ArrayList<Senator> currdisplay;
+    Senator curr;
 
     @Override
     protected void onStart() {
@@ -71,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
             ContentInternet task = new ContentInternet();
             task.execute();
             try{Thread.sleep(17000);} catch(InterruptedException e){Log.d("InterruptedExc",e.toString());}
+            currdisplay = senators;
         }
         Log.d("Done","done");
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -82,13 +85,13 @@ public class MainActivity extends AppCompatActivity {
             binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    binding.electionyear.setText("Next Election: " + senators.get(i).getClassNum());
-                    binding.state.setText(senators.get(i).getState());
+                    curr = (Senator) adapterView.getItemAtPosition(i);
+                    binding.electionyear.setText("Next Election: " + curr.getClassNum());
+                    binding.state.setText(curr.getState());
                 }
             });
         } else{
-            CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, senators, binding, totald, totalr, this);
-            binding.llistView.setAdapter(adapter);
+
             setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
             setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
 
@@ -164,6 +167,8 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
                     adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout,newsen, binding, totald, totalr, MainActivity.this);
+                    currdisplay = newsen;
+                    //adapter.notifyDataSetChanged();
                     binding.llistView.setAdapter(adapter);
                 }
 
@@ -176,11 +181,11 @@ public class MainActivity extends AppCompatActivity {
             binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                    Senator s = (Senator) binding.llistView.getItemAtPosition(i);
-                    binding.lelectionyear.setText("Next Election: " + s.getClassNum());
-                    binding.lstate.setText(s.getState());
-                    binding.lastelec.setText(s.getLastElection());
-                    binding.opinion.setText((s.getParty().charAt(0) == 'R') ? "Republicans are currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. However, Manchin's no-vote may kill their chances.");
+                    curr = (Senator) binding.llistView.getItemAtPosition(i);
+                    binding.lelectionyear.setText("Next Election: " + curr.getClassNum());
+                    binding.lstate.setText(curr.getState());
+                    binding.lastelec.setText(curr.getLastElection());
+                    binding.opinion.setText((curr.getParty().charAt(0) == 'R') ? "Republicans are currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. However, Manchin's no-vote may kill their chances.");
                 }
             });
         }
@@ -254,5 +259,55 @@ public class MainActivity extends AppCompatActivity {
     }
     public void permanentRemove(Senator s, CustomAdapter adapter){
         senators.remove(s);
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            outState.putString("state", binding.state.getText().toString());
+            outState.putString("election", binding.electionyear.getText().toString());
+            outState.putInt("totald", totald);
+            outState.putInt("totalr", totalr);
+        } else{
+            outState.putString("state", binding.lstate.getText().toString());
+            outState.putString("election", binding.lelectionyear.getText().toString());
+            outState.putInt("totald", totald);
+            outState.putInt("totalr", totalr);
+            outState.putInt("filter1", binding.filter.getSelectedItemPosition());
+            outState.putInt("filter2", binding.filter2.getSelectedItemPosition());
+        }
+        outState.putParcelableArrayList("display",currdisplay);
+        outState.putParcelableArrayList("senators", senators);
+        outState.putParcelable("curr", curr);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        senators = savedInstanceState.getParcelableArrayList("senators");
+        totalr = savedInstanceState.getInt("totalr");
+        totald = savedInstanceState.getInt("totald");
+        currdisplay = savedInstanceState.getParcelableArrayList("display");
+        curr = savedInstanceState.getParcelable("curr");
+        CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, currdisplay, binding, totald, totalr, this);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            binding.listView.setAdapter(adapter);
+            binding.composition.setText(totald+"-"+totalr);
+            binding.state.setText(savedInstanceState.getString("state"));
+            binding.electionyear.setText(savedInstanceState.getString("election"));
+        } else{
+            binding.llistView.setAdapter(adapter);
+            binding.lcomposition.setText(totald+"-"+totalr);
+            binding.lstate.setText(savedInstanceState.getString("state"));
+            binding.lelectionyear.setText(savedInstanceState.getString("election"));
+            Log.d("filter1", savedInstanceState.getInt("filter")+"");
+            binding.filter.setSelection(savedInstanceState.getInt("filter"));
+            binding.filter2.setSelection(savedInstanceState.getInt("filter2"));
+            if(curr != null) {
+                binding.lastelec.setText(curr.getLastElection());
+                binding.opinion.setText((curr.getParty().charAt(0) == 'R') ? "Republicans are currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. However, Manchin's no-vote may kill their chances.");
+            }
+        }
     }
 }
