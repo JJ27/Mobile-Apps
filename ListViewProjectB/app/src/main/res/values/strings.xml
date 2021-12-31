@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">LIstViewProjectB</string>
+    <string name="app_name">ListViewProjectB</string>
+    <string name="volup">&#128266;</string>
+    <string name="voldown">&#128265;</string>
 </resources>

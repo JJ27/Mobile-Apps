@@ -60,9 +60,8 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
         bindings.remove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("Remove",getItem(position).getName());
                 m.permanentRemove(getItem(position), CustomAdapter.this);
-                if ((list.remove(position).getParty().contains("Republican"))) {
+                if ((list.remove(position).getParty().charAt(0) == 'R')) {
                     totalr--;
                 } else {
                     totald--;

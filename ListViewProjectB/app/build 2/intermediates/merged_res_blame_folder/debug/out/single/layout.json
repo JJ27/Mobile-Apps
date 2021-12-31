@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/ListViewProjectB/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_main.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/ListViewProjectB/app/src/main/res/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/ListViewProjectB/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/adapter_layout.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/ListViewProjectB/app/src/main/res/layout/adapter_layout.xml"
+    }
+]

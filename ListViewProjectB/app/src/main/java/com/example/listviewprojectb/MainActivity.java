@@ -15,9 +15,11 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +30,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -37,6 +40,18 @@ import org.jsoup.select.Elements;
 import com.example.listviewprojectb.databinding.ActivityMainBinding;
 import com.example.listviewprojectb.databinding.AdapterLayoutBinding;
 import com.example.listviewprojectb.databinding.AdapterLayoutBindingImpl;
+import com.google.android.youtube.player.YouTubeBaseActivity;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
+import com.google.common.util.concurrent.AsyncCallable;
+import com.octo.android.robospice.persistence.retrofit.JacksonRetrofitObjectPersisterFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -46,11 +61,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends YouTubeBaseActivity {
     ActivityMainBinding binding;
     ArrayList<Senator> senators;
     ArrayList<Senator> currdisplay;
     Senator curr;
+    YouTubePlayer player;
+    String api_key;
+    boolean videoView = false;
+    int time;
 
     @Override
     protected void onStart() {
@@ -65,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        api_key = "AIzaSyB85uoRLz3Z2zrYwwG2Hwo_TceHrhQzFU0";
 
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main);
 
@@ -91,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else{
-
             setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
             setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
 
@@ -177,15 +196,126 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-
             binding.llistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                     curr = (Senator) binding.llistView.getItemAtPosition(i);
+                    if(player == null) {
+                        binding.ytPlayer.initialize(api_key, new YouTubePlayer.OnInitializedListener() {
+                            @Override
+                            public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+                                SearchVideo s = new SearchVideo();
+                                s.execute(curr.getName() + " best speech");
+                                try{
+                                    Thread.sleep(200);
+                                } catch(InterruptedException e){Log.d("InterruptedExc",e.toString());}
+                                player = youTubePlayer;
+                                player.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+                                    @Override
+                                    public void onLoading() { }
+                                    @Override
+                                    public void onLoaded(String s) { }
+                                    @Override
+                                    public void onAdStarted() { }
+                                    @Override
+                                    public void onVideoStarted() {
+                                        if(savedInstanceState != null && !(time/1000 > player.getDurationMillis())){
+                                            player.seekToMillis(time);
+                                            time = 0;
+                                        }
+                                    }
+                                    @Override
+                                    public void onVideoEnded() { }
+                                    @Override
+                                    public void onError(YouTubePlayer.ErrorReason errorReason) { }
+                                });
+                            }
+
+                            @Override
+                            public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+                                Toast.makeText(getApplicationContext(), "Video Player Failed", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else{
+                        SearchVideo s = new SearchVideo();
+                        s.execute(curr.getName() + " best speech");
+                    }
                     binding.lelectionyear.setText("Next Election: " + curr.getClassNum());
                     binding.lstate.setText(curr.getState());
                     binding.lastelec.setText(curr.getLastElection());
                     binding.opinion.setText((curr.getParty().charAt(0) == 'R') ? "Republicans are currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. However, Manchin's no-vote may kill their chances.");
+                }
+            });
+            binding.watch.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!videoView) {
+                        binding.electtitle.setVisibility(View.INVISIBLE);
+                        binding.lastelec.setVisibility(View.INVISIBLE);
+                        binding.opinion.setVisibility(View.INVISIBLE);
+                        binding.ytPlayer.setVisibility(View.VISIBLE);
+                        binding.volup.setVisibility(View.VISIBLE);
+                        binding.voldown.setVisibility(View.VISIBLE);
+                        if(player == null){
+                            binding.ytPlayer.initialize(api_key, new YouTubePlayer.OnInitializedListener() {
+                                @Override
+                                public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+                                    SearchVideo s = new SearchVideo();
+                                    s.execute(curr.getName() + " best speech");
+                                    try{
+                                        Thread.sleep(200);
+                                    } catch(InterruptedException e){Log.d("InterruptedExc",e.toString());}
+                                    player = youTubePlayer;
+                                    player.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {@Override
+                                    public void onLoading() { }
+                                        @Override
+                                        public void onLoaded(String s) { }
+                                        @Override
+                                        public void onAdStarted() { }
+                                        @Override
+                                        public void onVideoStarted() {
+                                            if(savedInstanceState != null && !(time/1000 > player.getDurationMillis())){
+                                                player.seekToMillis(time);
+                                                time = 0;
+                                            }
+                                        }
+                                        @Override
+                                        public void onVideoEnded() { }
+                                        @Override
+                                        public void onError(YouTubePlayer.ErrorReason errorReason) { }
+                                    });
+                                }
+
+                                @Override
+                                public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+                                    Toast.makeText(getApplicationContext(), "Video Player Failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } else{
+                        binding.electtitle.setVisibility(View.VISIBLE);
+                        binding.lastelec.setVisibility(View.VISIBLE);
+                        binding.opinion.setVisibility(View.VISIBLE);
+                        binding.ytPlayer.setVisibility(View.INVISIBLE);
+                        binding.volup.setVisibility(View.INVISIBLE);
+                        binding.voldown.setVisibility(View.INVISIBLE);
+                        if(player != null)
+                            player.pause();
+                    }
+                    videoView = !videoView;
+                }
+            });
+            AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            binding.voldown.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+                }
+            });
+            binding.volup.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
                 }
             });
         }
@@ -235,6 +365,44 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(dVoid);
         }
     }
+    private class SearchVideo extends AsyncTask<String, Void, String>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... queries) {
+            try{
+                YouTube youtube = new YouTube.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), new HttpRequestInitializer() {
+                    @Override
+                    public void initialize(HttpRequest request) throws IOException {}
+                }).setApplicationName("listviewprojectb").build();
+
+                YouTube.Search.List search = youtube.search().list(Arrays.asList("id","snippet"));
+                search.setKey(api_key);
+                search.setQ(queries[0]);
+                search.setType(Arrays.asList("video"));
+                search.setFields("items(id/videoId)");
+                search.setMaxResults(1L);
+
+                SearchResult s = search.execute().getItems().get(0);
+                return s.toString();
+            } catch(IOException e){
+                Log.d("IOException", e.toString());
+            }
+            return "error-search";
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            player.cueVideo(result.substring(18,29));
+            if((binding.electtitle.getVisibility() == View.INVISIBLE) && (player != null)){
+                player.play();
+            }
+        }
+    }
     public String getElectionResult(@NonNull Senator senator){
         try {
             Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + senator.getClassNum() + "_United_States_Senate_elections").get();
@@ -259,6 +427,33 @@ public class MainActivity extends AppCompatActivity {
     }
     public void permanentRemove(Senator s, CustomAdapter adapter){
         senators.remove(s);
+        if(s.equals(curr)) {
+            binding.electtitle.setText("Last Election Result");
+            binding.lastelec.setText("%");
+            binding.opinion.setText("Party Selection");
+        }
+    }
+
+    public String search(String query){
+        try{
+            YouTube youtube = new YouTube.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), new HttpRequestInitializer() {
+                @Override
+                public void initialize(HttpRequest request) throws IOException {}
+            }).setApplicationName("listviewprojectb").build();
+
+            YouTube.Search.List search = youtube.search().list(Arrays.asList("id","snippet"));
+            search.setKey(api_key);
+            search.setQ(query);
+            search.setType(Arrays.asList("video"));
+            search.setFields("items(id/videoId)");
+            search.setMaxResults(1L);
+
+            SearchResult s = search.execute().getItems().get(0);
+            return s.toString();
+        } catch(IOException e){
+            Log.d("IOException", e.getCause().toString());
+        }
+        return "error-search";
     }
 
     @Override
@@ -276,10 +471,13 @@ public class MainActivity extends AppCompatActivity {
             outState.putInt("totalr", totalr);
             outState.putInt("filter1", binding.filter.getSelectedItemPosition());
             outState.putInt("filter2", binding.filter2.getSelectedItemPosition());
+            time = player.getCurrentTimeMillis();
         }
         outState.putParcelableArrayList("display",currdisplay);
         outState.putParcelableArrayList("senators", senators);
         outState.putParcelable("curr", curr);
+        outState.putBoolean("vis", videoView);
+        outState.putInt("time",time);
     }
 
     @Override
@@ -290,20 +488,24 @@ public class MainActivity extends AppCompatActivity {
         totald = savedInstanceState.getInt("totald");
         currdisplay = savedInstanceState.getParcelableArrayList("display");
         curr = savedInstanceState.getParcelable("curr");
+        time = savedInstanceState.getInt("time");
         CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, currdisplay, binding, totald, totalr, this);
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             binding.listView.setAdapter(adapter);
             binding.composition.setText(totald+"-"+totalr);
             binding.state.setText(savedInstanceState.getString("state"));
             binding.electionyear.setText(savedInstanceState.getString("election"));
+            videoView = savedInstanceState.getBoolean("vis");
         } else{
             binding.llistView.setAdapter(adapter);
             binding.lcomposition.setText(totald+"-"+totalr);
             binding.lstate.setText(savedInstanceState.getString("state"));
             binding.lelectionyear.setText(savedInstanceState.getString("election"));
-            Log.d("filter1", savedInstanceState.getInt("filter")+"");
             binding.filter.setSelection(savedInstanceState.getInt("filter"));
             binding.filter2.setSelection(savedInstanceState.getInt("filter2"));
+            if(savedInstanceState.getBoolean("vis") && (binding.electtitle.getVisibility() != View.INVISIBLE)) {
+                binding.watch.callOnClick();
+            }
             if(curr != null) {
                 binding.lastelec.setText(curr.getLastElection());
                 binding.opinion.setText((curr.getParty().charAt(0) == 'R') ? "Republicans are currently winning the generic ballot. After wins in Virginia and close in NJ, they have high momentum going into 2022." : "After the infrastructure bill, Democrats aim to pass an ambitious Build Back Better bill before the elections. However, Manchin's no-vote may kill their chances.");

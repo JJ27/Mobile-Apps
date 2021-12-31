@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+                                                              
+                                                        
+
+    
+
+           
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" android:tag="layout-land/activity_main_0" xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+        <ListView
+            android:id="@+id/llistView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintHeight_percent="0.85"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.55" />
+
+        <View
+            android:id="@+id/view2"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@android:color/black"
+            app:layout_constraintTop_toBottomOf="@+id/llistView" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintEnd_toEndOf="@+id/llistView" />
+
+        <View
+            android:id="@+id/view1"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/filter2"
+            app:layout_constraintStart_toEndOf="@+id/filter"
+            app:layout_constraintTop_toTopOf="@+id/view2" />
+
+        <View
+            android:id="@+id/view5"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintEnd_toStartOf="@+id/lcomposition"
+            app:layout_constraintStart_toEndOf="@+id/lelectionyear"
+            app:layout_constraintTop_toBottomOf="@+id/llistView" />
+
+        <View
+            android:id="@+id/view3"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintEnd_toStartOf="@+id/lelectionyear"
+            app:layout_constraintStart_toEndOf="@+id/lstate"
+            app:layout_constraintTop_toBottomOf="@+id/llistView" />
+
+        <com.google.android.youtube.player.YouTubePlayerView
+            android:id="@+id/ytPlayer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@+id/watch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toTopOf="@+id/electtitle" />
+
+        <TextView
+            android:id="@+id/electtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Last Election Result"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/lastelec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="%"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toTopOf="@+id/opinion"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/electtitle" />
+
+        <TextView
+            android:id="@+id/opinion"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Party Selection"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@+id/watch"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/lastelec" />
+
+        <Button
+            android:id="@+id/volup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/volup"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/watch"
+            app:layout_constraintEnd_toEndOf="@+id/view2"
+            app:layout_constraintStart_toEndOf="@+id/watch"
+            app:layout_constraintTop_toBottomOf="@+id/ytPlayer" />
+
+        <Button
+            android:id="@+id/watch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Watch"
+            app:layout_constraintBottom_toTopOf="@+id/view1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/opinion" />
+
+        <Button
+            android:id="@+id/voldown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/voldown"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@+id/watch"
+            app:layout_constraintEnd_toStartOf="@+id/watch"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toBottomOf="@+id/ytPlayer" />
+
+        <Spinner
+            android:id="@+id/filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="25dp"
+            app:layout_constraintBottom_toBottomOf="@+id/lcomposition"
+            app:layout_constraintEnd_toStartOf="@+id/filter2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toEndOf="@+id/llistView"
+            app:layout_constraintTop_toTopOf="@+id/lcomposition" />
+
+        <TextView
+            android:id="@+id/lelectionyear"
+            android:layout_width="150dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Next Election"
+            app:layout_constraintBottom_toBottomOf="@+id/lstate"
+            app:layout_constraintEnd_toStartOf="@+id/lcomposition"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/lstate"
+            app:layout_constraintTop_toTopOf="@+id/lstate" />
+
+        <TextView
+            android:id="@+id/lcomposition"
+            android:layout_width="80dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="25dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="50-50"
+            app:layout_constraintBottom_toBottomOf="@+id/lstate"
+            app:layout_constraintEnd_toEndOf="@+id/llistView"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/lelectionyear"
+            app:layout_constraintTop_toTopOf="@+id/lstate"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <TextView
+            android:id="@+id/lstate"
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="28dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="State"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/lelectionyear"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llistView" />
+
+        <Spinner
+            android:id="@+id/filter2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/filter"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/filter"
+            app:layout_constraintTop_toTopOf="@+id/filter" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+         
