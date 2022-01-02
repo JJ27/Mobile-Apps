@@ -67,9 +67,10 @@ public class MainActivity extends YouTubeBaseActivity {
     ArrayList<Senator> currdisplay;
     Senator curr;
     YouTubePlayer player;
-    String api_key;
+    String api_key, backup_api_key;
     boolean videoView = false;
-    int time;
+    int time, filter1, filter2;
+    int q = 0;
 
     @Override
     protected void onStart() {
@@ -85,6 +86,7 @@ public class MainActivity extends YouTubeBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         api_key = "AIzaSyB85uoRLz3Z2zrYwwG2Hwo_TceHrhQzFU0";
+        backup_api_key = "AIzaSyAniuMYYxFK1ScGD7fx39KdYiPsPRD5T2U";
 
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main);
 
@@ -94,6 +96,9 @@ public class MainActivity extends YouTubeBaseActivity {
             task.execute();
             try{Thread.sleep(17000);} catch(InterruptedException e){Log.d("InterruptedExc",e.toString());}
             currdisplay = senators;
+        } else{
+            filter1 = savedInstanceState.getInt("filter");
+            filter2 = savedInstanceState.getInt("filter2");
         }
         Log.d("Done","done");
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -111,36 +116,25 @@ public class MainActivity extends YouTubeBaseActivity {
                 }
             });
         } else{
-            setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
-            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
-
-            binding.filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    switch(parent.getAdapter().getItem(position).toString()){
-                        case "Default":
-                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
-                            break;
-                        case "Party":
-                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Dem", "GOP")));
-                            break;
-                        case "Class":
-                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("2022", "2024", "2026")));
-                            break;
-                        case "Strength":
-                            setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Solid", "Likely", "Lean", "Tilt")));
-                            break;
+            if(savedInstanceState == null) {
+                Log.d("filternull","null");
+                setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
+                setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
+                binding.filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        Log.d("filter1onclick",binding.filter.getItemAtPosition(position).toString());
+                        spinner2init(parent.getAdapter().getItem(position).toString());
                     }
-                }
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) { }
+                });
+            }
 
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
             binding.filter2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Log.d("filter2onclick",binding.filter2.getItemAtPosition(position).toString());
                     ArrayList<Senator> newsen = new ArrayList<Senator>();
                     newsen.addAll(senators);
                     CustomAdapter adapter;
@@ -256,7 +250,7 @@ public class MainActivity extends YouTubeBaseActivity {
                         binding.ytPlayer.setVisibility(View.VISIBLE);
                         binding.volup.setVisibility(View.VISIBLE);
                         binding.voldown.setVisibility(View.VISIBLE);
-                        if(player == null){
+                        if(player == null && curr != null){
                             binding.ytPlayer.initialize(api_key, new YouTubePlayer.OnInitializedListener() {
                                 @Override
                                 public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
@@ -456,6 +450,26 @@ public class MainActivity extends YouTubeBaseActivity {
         return "error-search";
     }
 
+    public void spinner2init(String pos){
+        Log.d("spinner2init", pos);
+        switch(pos){
+            case "Default":
+                setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
+                break;
+            case "Party":
+                setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Dem", "GOP")));
+                break;
+            case "Class":
+                setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("2022", "2024", "2026")));
+                break;
+            case "Strength":
+                setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Solid", "Likely", "Lean", "Tilt")));
+                break;
+            default:
+                Log.d("spinner2init","StringDefaultError");
+        }
+    }
+
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -464,14 +478,16 @@ public class MainActivity extends YouTubeBaseActivity {
             outState.putString("election", binding.electionyear.getText().toString());
             outState.putInt("totald", totald);
             outState.putInt("totalr", totalr);
+            outState.putInt("filter", filter1);
+            outState.putInt("filter2", filter2);
         } else{
             outState.putString("state", binding.lstate.getText().toString());
             outState.putString("election", binding.lelectionyear.getText().toString());
             outState.putInt("totald", totald);
             outState.putInt("totalr", totalr);
-            outState.putInt("filter1", binding.filter.getSelectedItemPosition());
+            outState.putInt("filter", binding.filter.getSelectedItemPosition());
             outState.putInt("filter2", binding.filter2.getSelectedItemPosition());
-            time = player.getCurrentTimeMillis();
+            time = (player != null) ? player.getCurrentTimeMillis() : 0;
         }
         outState.putParcelableArrayList("display",currdisplay);
         outState.putParcelableArrayList("senators", senators);
@@ -489,6 +505,8 @@ public class MainActivity extends YouTubeBaseActivity {
         currdisplay = savedInstanceState.getParcelableArrayList("display");
         curr = savedInstanceState.getParcelable("curr");
         time = savedInstanceState.getInt("time");
+        filter1 = savedInstanceState.getInt("filter");
+        filter2 = savedInstanceState.getInt("filter2");
         CustomAdapter adapter = new CustomAdapter(this, R.layout.adapter_layout, currdisplay, binding, totald, totalr, this);
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             binding.listView.setAdapter(adapter);
@@ -501,8 +519,21 @@ public class MainActivity extends YouTubeBaseActivity {
             binding.lcomposition.setText(totald+"-"+totalr);
             binding.lstate.setText(savedInstanceState.getString("state"));
             binding.lelectionyear.setText(savedInstanceState.getString("election"));
-            binding.filter.setSelection(savedInstanceState.getInt("filter"));
-            binding.filter2.setSelection(savedInstanceState.getInt("filter2"));
+            setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
+            binding.filter.setSelection(filter1, false);
+            binding.filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    Log.d("filter1onclick",binding.filter.getItemAtPosition(position).toString());
+                    spinner2init(parent.getAdapter().getItem(position).toString());
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) { }
+            });
+            spinner2init(binding.filter.getItemAtPosition(filter1).toString());
+            Log.d("selectionset","trying to set selection");
+            binding.filter2.setSelection(filter2,true);
             if(savedInstanceState.getBoolean("vis") && (binding.electtitle.getVisibility() != View.INVISIBLE)) {
                 binding.watch.callOnClick();
             }
