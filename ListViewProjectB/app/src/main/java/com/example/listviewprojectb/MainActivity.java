@@ -421,7 +421,7 @@ public class MainActivity extends YouTubeBaseActivity {
     }
     public void permanentRemove(Senator s, CustomAdapter adapter){
         senators.remove(s);
-        if(s.equals(curr)) {
+        if(s.equals(curr) && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.electtitle.setText("Last Election Result");
             binding.lastelec.setText("%");
             binding.opinion.setText("Party Selection");

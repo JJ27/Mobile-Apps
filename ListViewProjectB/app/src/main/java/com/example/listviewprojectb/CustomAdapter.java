@@ -60,12 +60,12 @@ public class CustomAdapter extends ArrayAdapter<Senator> {
         bindings.remove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                m.permanentRemove(getItem(position), CustomAdapter.this);
-                if ((list.remove(position).getParty().charAt(0) == 'R')) {
+                if ((list.get(position).getParty().charAt(0) == 'R')) {
                     totalr--;
                 } else {
                     totald--;
                 }
+                m.permanentRemove(getItem(position), CustomAdapter.this);
                 if(context.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT)
                     binding.composition.setText(totald + "-" + totalr);
                 else
