@@ -420,11 +420,16 @@ public class MainActivity extends YouTubeBaseActivity {
     }
     public void permanentRemove(Senator s, CustomAdapter adapter){
         senators.remove(s);
+        adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout,senators, binding, totald, totalr, MainActivity.this);
         if(s.equals(curr) && getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.electtitle.setText("Last Election Result");
             binding.lastelec.setText("%");
             binding.opinion.setText("Party Selection");
         }
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            binding.listView.setAdapter(adapter);
+        else
+            binding.llistView.setAdapter(adapter);
     }
 
     public String search(String query){
