@@ -117,7 +117,6 @@ public class MainActivity extends YouTubeBaseActivity {
             });
         } else{
             if(savedInstanceState == null) {
-                Log.d("filternull","null");
                 setSpinner(binding.filter, new ArrayList<String>(Arrays.asList("Default","Party","Class","Strength")));
                 setSpinner(binding.filter2, new ArrayList<String>(Arrays.asList("Default")));
                 binding.filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -532,7 +531,6 @@ public class MainActivity extends YouTubeBaseActivity {
                 public void onNothingSelected(AdapterView<?> parent) { }
             });
             spinner2init(binding.filter.getItemAtPosition(filter1).toString());
-            Log.d("selectionset","trying to set selection");
             binding.filter2.setSelection(filter2,true);
             if(savedInstanceState.getBoolean("vis") && (binding.electtitle.getVisibility() != View.INVISIBLE)) {
                 binding.watch.callOnClick();
