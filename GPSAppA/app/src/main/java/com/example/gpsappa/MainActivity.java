@@ -5,9 +5,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.LocationRequest;
 import android.os.Bundle;
 import android.view.View;
 
@@ -47,10 +49,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getLoc() throws IOException {
-        gpsService = new GPSService(MainActivity.this, 1);
+        gpsService = new GPSService(MainActivity.this, 1, binding);
         binding.lat.setText("Latitude: " + String.valueOf(gpsService.getLocation().getLatitude()));
         binding.lon.setText("Longitude: " + String.valueOf(gpsService.getLocation().getLongitude()));
         Address address = geocoder.getFromLocation(gpsService.getLocation().getLatitude(), gpsService.getLocation().getLongitude(),1).get(0);
         binding.address.setText("Address: " + address.getAddressLine(0).trim());
     }
+
 }

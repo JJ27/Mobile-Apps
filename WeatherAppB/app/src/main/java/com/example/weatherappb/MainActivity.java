@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             ObjectMapper mapper = new ObjectMapper();
-            DashboardFragment weather = (DashboardFragment) getSupportFragmentManager().findFragmentById(R.id.navigation_dashboard);
             try {
                 JsonNode root = mapper.readTree(intent.getStringExtra("json"));
                 System.out.println(intent.getStringExtra("json"));
@@ -116,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     df.setTimeZone(java.util.TimeZone.getTimeZone("GMT-5"));
                     String formattedDate = df.format(date);
                     JsonNode root4 = mapper.readTree(array.get(i).get("weather").toString().substring(1).replaceAll("]",""));
+                    System.out.println(root4.get("main").toString().replaceAll("\"",""));
                     weatherlist.add(new Weather(formattedDate, array.get(i).get("temp").toString(), root4.get("main").toString().replaceAll("\"",""), root4.get("icon").toString().replaceAll("\"","")));
                 }
                 CustomAdapter adapter = new CustomAdapter(MainActivity.this, R.layout.adapter_layout, weatherlist);
@@ -124,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
                 binding.currtemp.setText("Invalid");
                 e.printStackTrace();
             }
-
         }
     }
 

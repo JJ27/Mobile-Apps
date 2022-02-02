@@ -45,6 +45,7 @@ public class CustomAdapter extends ArrayAdapter<Weather> {
             bindings.temp.setText(list.get(position).getTemp());
         else
             bindings.temp.setText(list.get(position).getTemp() + "0");
+        bindings.conditions.setText(list.get(position).getDesc());
         Picasso.get().load("http://openweathermap.org/img/wn/"+list.get(position).getIcon()+"@2x.png").into(bindings.weathericon);
         return bindings.getRoot();
     }

@@ -19,58 +19,45 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.example.gpsappa.databinding.ActivityMainBinding;
+
 import java.util.List;
 
 public class GPSService extends Service implements LocationListener {
     private final Context context;
-    private static final long updateDist = 5; //updates every 5 m
-    private static final long updateTime = 30 * 1000; //updates every 30s
+    private static final long updateDist = 1; //updates every 1 m
+    private static final long updateTime = 1 * 1000; //updates every 1s
     protected LocationManager locationManager;
     private Location location;
+    ActivityMainBinding binding;
 
 
-    public GPSService(Context context, int type) {
+    public GPSService(Context context, int type, ActivityMainBinding binding) {
         this.context = context;
-        getCurrLocation(type);
+        getCurrLocation();
+        this.binding = binding;
     }
 
-    public Location getCurrLocation(int type){
-        try{
-            locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-            if(type == 0) {
-                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                    //no location possible??
-                    throw new Exception("Network Location Not Found");
-                } else {
-                    if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
-                        }
-                        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, updateTime, updateDist, this);
-                        Log.d("Access", "Network");
-                        if (locationManager != null) {
-                            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        }
-                    }
-                }
+    private Location getCurrLocation() {
+        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        turnGpsOn(context);
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                System.out.println("No Permissions");
+                return null;
             }
-            turnGpsOn(context);
-            if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                if(location == null){
-                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
-                    }
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, updateTime, updateDist, this);
-                    Log.d("Access", "GPS");
-                    if(locationManager != null){
-                        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    }
-                }
+            Location l = locationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
             }
-        } catch(Exception e){
-            e.printStackTrace();
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
         }
-        return location;
+        return bestLocation;
     }
 
     @Nullable
@@ -98,7 +85,11 @@ public class GPSService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location location) {
         //TODO: Display lat and long in layout from here
-        this.location = location;
+        if(location != null) {
+            this.location = location;
+            binding.lat.setText("Latitude: " + String.valueOf(location.getLatitude()));
+            binding.lon.setText("Longitude: " + String.valueOf(location.getLongitude()));
+        }
     }
 
     public Location getLocation() {
