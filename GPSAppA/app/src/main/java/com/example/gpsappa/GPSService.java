@@ -2,18 +2,17 @@ package com.example.gpsappa;
 
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +20,7 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.gpsappa.databinding.ActivityMainBinding;
 
+import java.io.IOException;
 import java.util.List;
 
 public class GPSService extends Service implements LocationListener {
@@ -34,7 +34,7 @@ public class GPSService extends Service implements LocationListener {
 
     public GPSService(Context context, int type, ActivityMainBinding binding) {
         this.context = context;
-        getCurrLocation();
+        this.location = getCurrLocation();
         this.binding = binding;
     }
 
@@ -44,16 +44,20 @@ public class GPSService extends Service implements LocationListener {
         List<String> providers = locationManager.getProviders(true);
         Location bestLocation = null;
         for (String provider : providers) {
+            if(provider.equals("passive"))
+                continue;
+            System.out.println(provider);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 System.out.println("No Permissions");
                 return null;
             }
             Location l = locationManager.getLastKnownLocation(provider);
-            if (l == null) {
+            if (l == null)
                 continue;
-            }
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
+                closeGPS();
+                locationManager.requestLocationUpdates(provider, updateTime, updateDist, this);
+                System.out.println(provider);
                 bestLocation = l;
             }
         }
@@ -85,11 +89,15 @@ public class GPSService extends Service implements LocationListener {
     @Override
     public void onLocationChanged(@NonNull Location location) {
         //TODO: Display lat and long in layout from here
-        if(location != null) {
-            this.location = location;
-            binding.lat.setText("Latitude: " + String.valueOf(location.getLatitude()));
-            binding.lon.setText("Longitude: " + String.valueOf(location.getLongitude()));
+        System.out.println("listener called" + location.getLongitude());
+        this.location = location;
+        try {
+            binding.address.setText("Address: " + new Geocoder(context).getFromLocation(location.getLatitude(), location.getLongitude(),1).get(0).getAddressLine(0).trim());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        binding.lat.setText("Latitude: " + location.getLatitude());
+        binding.lon.setText("Longitude: " + location.getLongitude());
     }
 
     public Location getLocation() {
