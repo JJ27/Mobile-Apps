@@ -43,10 +43,11 @@ public class GPSService extends Service implements LocationListener {
         turnGpsOn(context);
         List<String> providers = locationManager.getProviders(true);
         Location bestLocation = null;
+        System.out.println("getCurrLocation()");
         for (String provider : providers) {
+            System.out.println(provider);
             if(provider.equals("passive"))
                 continue;
-            System.out.println(provider);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 System.out.println("No Permissions");
                 return null;
@@ -79,7 +80,7 @@ public class GPSService extends Service implements LocationListener {
             Settings.Secure.putString (context.getContentResolver(),
                     Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
                     newSet);
-        } catch(Exception e) {}
+        } catch(Exception e) {e.printStackTrace();}
     }
     public void closeGPS(){
         if(locationManager != null)
