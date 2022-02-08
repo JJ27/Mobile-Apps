@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
@@ -13,6 +14,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,48 +23,55 @@ import androidx.core.app.ActivityCompat;
 import com.example.gpsappa.databinding.ActivityMainBinding;
 
 import java.io.IOException;
+import java.security.Provider;
 import java.util.List;
 
 public class GPSService extends Service implements LocationListener {
     private final Context context;
-    private static final long updateDist = 1; //updates every 1 m
-    private static final long updateTime = 1 * 1000; //updates every 1s
+    private static final long updateDist = 1L; //updates every 1 m
+    private static final long updateTime = 5000L; //updates every 1s
     protected LocationManager locationManager;
     private Location location;
     ActivityMainBinding binding;
+    public static Location lastLocation;
+    public static double lastDistance;
 
 
     public GPSService(Context context, int type, ActivityMainBinding binding) {
         this.context = context;
         this.location = getCurrLocation();
         this.binding = binding;
+        lastDistance = 0;
+        lastLocation = null;
     }
 
     private Location getCurrLocation() {
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
         locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-        turnGpsOn(context);
-        List<String> providers = locationManager.getProviders(true);
-        Location bestLocation = null;
-        System.out.println("getCurrLocation()");
-        for (String provider : providers) {
-            System.out.println(provider);
-            if(provider.equals("passive"))
-                continue;
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                System.out.println("No Permissions");
-                return null;
-            }
-            Location l = locationManager.getLastKnownLocation(provider);
-            if (l == null)
-                continue;
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                closeGPS();
-                locationManager.requestLocationUpdates(provider, updateTime, updateDist, this);
-                System.out.println(provider);
-                bestLocation = l;
-            }
+        String provider = locationManager.getBestProvider(criteria, true);
+        if (provider == null) {
+            Log.v("TAG", "Provider is null");
+            return null;
+        } else {
+            Log.v("TAG", "Provider: " + provider);
         }
-        return bestLocation;
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500L, 1f, this);
+        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 500L, 0f, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500L, 0f, this);
+        return null;
     }
 
     @Nullable
@@ -92,6 +101,14 @@ public class GPSService extends Service implements LocationListener {
         //TODO: Display lat and long in layout from here
         System.out.println("listener called" + location.getLongitude());
         this.location = location;
+        if(lastLocation == null)
+            binding.distance.setText("Distance: 0m");
+        else{
+            lastDistance += location.distanceTo(lastLocation);
+            lastLocation = location;
+            System.out.println("DistL " + location.distanceTo(lastLocation));
+            binding.distance.setText("Distance: " + lastDistance);
+        }
         try {
             binding.address.setText("Address: " + new Geocoder(context).getFromLocation(location.getLatitude(), location.getLongitude(),1).get(0).getAddressLine(0).trim());
         } catch (IOException e) {
