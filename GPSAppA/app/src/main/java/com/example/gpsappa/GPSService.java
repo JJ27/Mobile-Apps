@@ -11,11 +11,14 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -35,6 +38,7 @@ public class GPSService extends Service implements LocationListener {
     ActivityMainBinding binding;
     public static Location lastLocation;
     public static double lastDistance;
+    public static int checkd;
 
 
     public GPSService(Context context, int type, ActivityMainBinding binding) {
@@ -43,6 +47,7 @@ public class GPSService extends Service implements LocationListener {
         this.binding = binding;
         lastDistance = 0;
         lastLocation = null;
+        checkd = 0;
     }
 
     private Location getCurrLocation() {
@@ -58,19 +63,9 @@ public class GPSService extends Service implements LocationListener {
         } else {
             Log.v("TAG", "Provider: " + provider);
         }
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return null;
-        }
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500L, 0f, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500L, 1f, this);
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 500L, 0f, this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500L, 0f, this);
         return null;
     }
 
@@ -101,14 +96,18 @@ public class GPSService extends Service implements LocationListener {
         //TODO: Display lat and long in layout from here
         System.out.println("listener called" + location.getLongitude());
         this.location = location;
-        if(lastLocation == null)
+        if(lastLocation == null) {
             binding.distance.setText("Distance: 0m");
-        else{
-            lastDistance += location.distanceTo(lastLocation);
-            lastLocation = location;
+        }else{
+            if(checkd > 3) {
+                if (!(location.distanceTo(lastLocation) >= 800))
+                    lastDistance += location.distanceTo(lastLocation);
+            }else
+                checkd++;
             System.out.println("DistL " + location.distanceTo(lastLocation));
             binding.distance.setText("Distance: " + lastDistance);
         }
+        lastLocation = location;
         try {
             binding.address.setText("Address: " + new Geocoder(context).getFromLocation(location.getLatitude(), location.getLongitude(),1).get(0).getAddressLine(0).trim());
         } catch (IOException e) {
