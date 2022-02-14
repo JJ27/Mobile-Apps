@@ -11,6 +11,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.location.LocationRequest;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -21,15 +22,28 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.location.LocationRequestCompat;
 
 import com.example.gpsappa.databinding.ActivityMainBinding;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApi;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.internal.OnConnectionFailedListener;
+import com.google.android.gms.location.FusedLocationProviderApi;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.security.Provider;
 import java.util.List;
 
-public class GPSService extends Service implements LocationListener {
+public class GPSService extends AppCompatActivity implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private final Context context;
     private static final long updateDist = 1L; //updates every 1 m
     private static final long updateTime = 5000L; //updates every 1s
@@ -39,6 +53,9 @@ public class GPSService extends Service implements LocationListener {
     public static Location lastLocation;
     public static double lastDistance;
     public static int checkd;
+    private FusedLocationProviderApi fuse;
+
+
 
 
     public GPSService(Context context, int type, ActivityMainBinding binding) {
@@ -48,6 +65,19 @@ public class GPSService extends Service implements LocationListener {
         lastDistance = 0;
         lastLocation = null;
         checkd = 0;
+        LocationRequestCompat request = new LocationRequestCompat.Builder(500).build();
+        GoogleApiClient client = new GoogleApiClient.Builder(context).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
+        LocationServices.FusedLocationApi.requestLocationUpdates(client, request, new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+            }
+
+            @Override
+            public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
+                super.onLocationAvailability(locationAvailability);
+            }
+        }, null);
     }
 
     private Location getCurrLocation() {
@@ -69,11 +99,11 @@ public class GPSService extends Service implements LocationListener {
         return null;
     }
 
-    @Nullable
+    /*@Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
+    }*/
     private void turnGpsOn (Context context) {
         String beforeEnable = Settings.Secure.getString (context.getContentResolver(),
                 Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -144,5 +174,20 @@ public class GPSService extends Service implements LocationListener {
     @Override
     public void onProviderDisabled(@NonNull String provider) {
         LocationListener.super.onProviderDisabled(provider);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }
