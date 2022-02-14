@@ -2,6 +2,7 @@ package com.example.gpsappa;
 
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,10 +12,11 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationRequest;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -27,7 +29,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.location.LocationRequestCompat;
 
 import com.example.gpsappa.databinding.ActivityMainBinding;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.internal.OnConnectionFailedListener;
@@ -36,14 +37,18 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
 import java.security.Provider;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class GPSService extends AppCompatActivity implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class GPSService extends AppCompatActivity implements LocationListener {
     private final Context context;
     private static final long updateDist = 1L; //updates every 1 m
     private static final long updateTime = 5000L; //updates every 1s
@@ -53,7 +58,7 @@ public class GPSService extends AppCompatActivity implements LocationListener, G
     public static Location lastLocation;
     public static double lastDistance;
     public static int checkd;
-    private FusedLocationProviderApi fuse;
+    private FusedLocationProviderClient fuse;
 
 
 
@@ -65,19 +70,76 @@ public class GPSService extends AppCompatActivity implements LocationListener, G
         lastDistance = 0;
         lastLocation = null;
         checkd = 0;
-        LocationRequestCompat request = new LocationRequestCompat.Builder(500).build();
-        GoogleApiClient client = new GoogleApiClient.Builder(context).addApi(LocationServices.API).addConnectionCallbacks(this).addOnConnectionFailedListener(this).build();
-        LocationServices.FusedLocationApi.requestLocationUpdates(client, request, new LocationCallback() {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            System.out.println("Denied");
+            ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+        }
+        fuse = LocationServices.getFusedLocationProviderClient(context);
+        fuse.getLastLocation().addOnCompleteListener((Activity) context, new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+                if(task.isSuccessful()) {
+                    Location l = task.getResult();
+                    GPSService.this.location = l;
+                    binding.lat.setText("Latitude: " + l.getLatitude());
+                    binding.lon.setText("Longitude: " + l.getLongitude());
+                    System.out.println(l.getLatitude() + " " + l.getLongitude());
+                } else{
+                    System.out.println("ONCOMPLETE ERROR");
+                }
+            }
+        });
+
+        LocationCallback callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
+                GPSService.this.location = locationResult.getLastLocation();
+                //TODO: Display lat and long in layout from here
+                System.out.println("listener called" + location.getLongitude());
+                if(lastLocation == null) {
+                    binding.distance.setText("Distance: 0m");
+                }else{
+                    if(checkd > 3) {
+                        if (!((location.distanceTo(lastLocation) >= 800) || (location.distanceTo(lastLocation) <= 2)))
+                            lastDistance += location.distanceTo(lastLocation);
+                    }else
+                        checkd++;
+                    System.out.println("DistL " + location.distanceTo(lastLocation));
+                    binding.distance.setText("Distance: " + lastDistance);
+                }
+                lastLocation = location;
+                //binding.address.setText("Address: " + new Geocoder(context).getFromLocation(location.getLatitude(), location.getLongitude(),1).get(0).getAddressLine(0).trim());
+                AddressGet add = new AddressGet();
+                try {
+                    binding.address.setText(add.execute(location).get());
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                binding.lat.setText("Latitude: " + location.getLatitude());
+                binding.lon.setText("Longitude: " + location.getLongitude());
+                System.out.println("CALLBACK: " + locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
             }
 
             @Override
             public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
                 super.onLocationAvailability(locationAvailability);
             }
-        }, null);
+        };
+        LocationRequest locationRequest = LocationRequest.create().setInterval(500).setFastestInterval(500).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
+    }
+
+    public class AddressGet extends AsyncTask<Location, Void, String>{
+        @Override
+        protected String doInBackground(Location... locations) {
+            try {
+                return new Geocoder(context).getFromLocation(locations[0].getLatitude(), locations[0].getLongitude(),1).get(0).getAddressLine(0).trim();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return "";
+        }
     }
 
     private Location getCurrLocation() {
@@ -93,7 +155,7 @@ public class GPSService extends AppCompatActivity implements LocationListener, G
         } else {
             Log.v("TAG", "Provider: " + provider);
         }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500L, 0f, this);
+        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500L, 0f, this);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500L, 1f, this);
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 500L, 0f, this);
         return null;
@@ -122,7 +184,7 @@ public class GPSService extends AppCompatActivity implements LocationListener, G
     }
 
     @Override
-    public void onLocationChanged(@NonNull Location location) {
+    public void onLocationChanged(@NonNull Location location) {/*
         //TODO: Display lat and long in layout from here
         System.out.println("listener called" + location.getLongitude());
         this.location = location;
@@ -145,7 +207,7 @@ public class GPSService extends AppCompatActivity implements LocationListener, G
         }
         binding.lat.setText("Latitude: " + location.getLatitude());
         binding.lon.setText("Longitude: " + location.getLongitude());
-    }
+    */}
 
     public Location getLocation() {
         return location;
@@ -176,18 +238,4 @@ public class GPSService extends AppCompatActivity implements LocationListener, G
         LocationListener.super.onProviderDisabled(provider);
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
-    }
 }
