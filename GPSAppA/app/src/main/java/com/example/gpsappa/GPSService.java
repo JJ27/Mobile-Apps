@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
@@ -19,6 +20,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -48,194 +50,113 @@ import java.security.Provider;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class GPSService extends AppCompatActivity implements LocationListener {
+public class GPSService extends AppCompatActivity {
     private final Context context;
-    private static final long updateDist = 1L; //updates every 1 m
-    private static final long updateTime = 5000L; //updates every 1s
     protected LocationManager locationManager;
-    private Location location;
     ActivityMainBinding binding;
-    public static Location lastLocation;
-    public static double lastDistance;
-    public static int checkd;
     private FusedLocationProviderClient fuse;
-
-
+    LocationCallback callback;
+    LocationRequest locationRequest;
+    Address currentAddy;
+    List<Address> prevAddy;
+    Location currLoc;
+    List<Location> prevLoc;
+    float totaldist;
 
 
     public GPSService(Context context, int type, ActivityMainBinding binding) {
         this.context = context;
-        this.location = getCurrLocation();
         this.binding = binding;
-        lastDistance = 0;
-        lastLocation = null;
-        checkd = 0;
+        this.totaldist = 0f;
+        fuse = LocationServices.getFusedLocationProviderClient(context);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             System.out.println("Denied");
-            ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
-        }
-        fuse = LocationServices.getFusedLocationProviderClient(context);
-        fuse.getLastLocation().addOnCompleteListener((Activity) context, new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if(task.isSuccessful()) {
-                    Location l = task.getResult();
-                    GPSService.this.location = l;
-                    binding.lat.setText("Latitude: " + l.getLatitude());
-                    binding.lon.setText("Longitude: " + l.getLongitude());
-                    System.out.println(l.getLatitude() + " " + l.getLongitude());
-                } else{
-                    System.out.println("ONCOMPLETE ERROR");
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+        } else{
+            fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    updateUI(location);
                 }
-            }
-        });
-
-        LocationCallback callback = new LocationCallback() {
+            });
+        }
+        callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
-                GPSService.this.location = locationResult.getLastLocation();
-                //TODO: Display lat and long in layout from here
-                System.out.println("listener called" + location.getLongitude());
-                if(lastLocation == null) {
-                    binding.distance.setText("Distance: 0m");
-                }else{
-                    if(checkd > 3) {
-                        if (!((location.distanceTo(lastLocation) >= 800) || (location.distanceTo(lastLocation) <= 2)))
-                            lastDistance += location.distanceTo(lastLocation);
-                    }else
-                        checkd++;
-                    System.out.println("DistL " + location.distanceTo(lastLocation));
-                    binding.distance.setText("Distance: " + lastDistance);
-                }
-                lastLocation = location;
-                //binding.address.setText("Address: " + new Geocoder(context).getFromLocation(location.getLatitude(), location.getLongitude(),1).get(0).getAddressLine(0).trim());
-                AddressGet add = new AddressGet();
-                try {
-                    binding.address.setText(add.execute(location).get());
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-                binding.lat.setText("Latitude: " + location.getLatitude());
-                binding.lon.setText("Longitude: " + location.getLongitude());
-                System.out.println("CALLBACK: " + locationResult.getLastLocation().getLatitude() + " " + locationResult.getLastLocation().getLongitude());
-            }
-
-            @Override
-            public void onLocationAvailability(@NonNull LocationAvailability locationAvailability) {
-                super.onLocationAvailability(locationAvailability);
+                System.out.println("CALLBACK");
+                updateUI(locationResult.getLastLocation());
             }
         };
-        LocationRequest locationRequest = LocationRequest.create().setInterval(500).setFastestInterval(500).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest = LocationRequest.create().setInterval(500).setFastestInterval(500).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
     }
 
-    public class AddressGet extends AsyncTask<Location, Void, String>{
-        @Override
-        protected String doInBackground(Location... locations) {
-            try {
-                return new Geocoder(context).getFromLocation(locations[0].getLatitude(), locations[0].getLongitude(),1).get(0).getAddressLine(0).trim();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return "";
-        }
-    }
-
-    private Location getCurrLocation() {
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(false);
-        criteria.setBearingRequired(false);
-        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-        String provider = locationManager.getBestProvider(criteria, true);
-        if (provider == null) {
-            Log.v("TAG", "Provider is null");
-            return null;
-        } else {
-            Log.v("TAG", "Provider: " + provider);
-        }
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 500L, 0f, this);
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500L, 1f, this);
-        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, 500L, 0f, this);
-        return null;
-    }
-
-    /*@Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }*/
-    private void turnGpsOn (Context context) {
-        String beforeEnable = Settings.Secure.getString (context.getContentResolver(),
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        String newSet = String.format ("%s,%s",
-                beforeEnable,
-                LocationManager.GPS_PROVIDER);
-        try {
-            Settings.Secure.putString (context.getContentResolver(),
-                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                    newSet);
-        } catch(Exception e) {e.printStackTrace();}
-    }
-    public void closeGPS(){
-        if(locationManager != null)
-            locationManager.removeUpdates(GPSService.this);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch(requestCode){
+            case 101:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            updateUI(location);
+                            currLoc = location;
+                        }
+                    });
+                } else{
+                    Toast.makeText(context, "This app requires location permissions!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+        }
     }
 
-    @Override
-    public void onLocationChanged(@NonNull Location location) {/*
-        //TODO: Display lat and long in layout from here
-        System.out.println("listener called" + location.getLongitude());
-        this.location = location;
-        if(lastLocation == null) {
-            binding.distance.setText("Distance: 0m");
-        }else{
-            if(checkd > 3) {
-                if (!(location.distanceTo(lastLocation) >= 800))
-                    lastDistance += location.distanceTo(lastLocation);
-            }else
-                checkd++;
-            System.out.println("DistL " + location.distanceTo(lastLocation));
-            binding.distance.setText("Distance: " + lastDistance);
-        }
-        lastLocation = location;
+    private void updateUI(Location loc){
+        binding.lat.setText("Latitude: " + loc.getLatitude());
+        binding.lon.setText("Longitude: " + loc.getLongitude());
+        //TODO: Include speed using loc.hasSpeed() and loc.getSpeed()
+        Geocoder gc = new Geocoder(context);
+        Address s = null;
         try {
-            binding.address.setText("Address: " + new Geocoder(context).getFromLocation(location.getLatitude(), location.getLongitude(),1).get(0).getAddressLine(0).trim());
+            s = gc.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1).get(0);
+            binding.address.setText(s.getAddressLine(0));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        binding.lat.setText("Latitude: " + location.getLatitude());
-        binding.lon.setText("Longitude: " + location.getLongitude());
-    */}
-
-    public Location getLocation() {
-        return location;
+        GPSApplication app = (GPSApplication) context.getApplicationContext();
+        prevLoc = app.getLocations();
+        prevAddy = app.getAddresses();
+        try {
+            if(loc.distanceTo(prevLoc.get(prevLoc.size() - 1)) <= 300){
+                totaldist += loc.distanceTo(prevLoc.get(prevLoc.size() - 1));
+            }
+        } catch(ArrayIndexOutOfBoundsException e){}
+        prevLoc.add(loc);
+        System.out.println(totaldist);
+        binding.distance.setText("Distance: " + totaldist);
+        //TODO: Find if address is new or not
+        /*currentAddy = s;
+        for(Address q: prevAddy){
+            if(q.getAddressLine(0).equals(s.getAddressLine(0)))
+        }
+        if(!prevAddy.contains(s)){
+            System.out.println(s);
+            prevAddy.add(s);
+        }*/
     }
 
     @Override
-    public void onLocationChanged(@NonNull List<Location> locations) {
-        LocationListener.super.onLocationChanged(locations);
+    protected void onDestroy() {
+        super.onDestroy();
+        fuse.removeLocationUpdates(callback);
     }
 
     @Override
-    public void onFlushComplete(int requestCode) {
-        LocationListener.super.onFlushComplete(requestCode);
+    protected void onResume() {
+        super.onResume();
+        fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
     }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-        LocationListener.super.onStatusChanged(provider, status, extras);
-    }
-
-    @Override
-    public void onProviderEnabled(@NonNull String provider) {
-        LocationListener.super.onProviderEnabled(provider);
-    }
-
-    @Override
-    public void onProviderDisabled(@NonNull String provider) {
-        LocationListener.super.onProviderDisabled(provider);
-    }
-
 }
