@@ -89,7 +89,7 @@ public class GPSService extends AppCompatActivity {
                 updateUI(locationResult.getLastLocation());
             }
         };
-        locationRequest = LocationRequest.create().setInterval(500).setFastestInterval(500).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest = LocationRequest.create().setInterval(1000).setFastestInterval(1000).setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
     }
 
@@ -130,7 +130,7 @@ public class GPSService extends AppCompatActivity {
         prevLoc = app.getLocations();
         prevAddy = app.getAddresses();
         try {
-            if(loc.distanceTo(prevLoc.get(prevLoc.size() - 1)) <= 300){
+            if(loc.distanceTo(prevLoc.get(prevLoc.size() - 1)) <= 500){
                 totaldist += loc.distanceTo(prevLoc.get(prevLoc.size() - 1));
             }
         } catch(ArrayIndexOutOfBoundsException e){}
