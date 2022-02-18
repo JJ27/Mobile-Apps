@@ -19,81 +19,88 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Latitude:"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/lon"
+            app:layout_constraintEnd_toEndOf="@+id/distance"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.4" />
+            app:layout_constraintStart_toStartOf="@+id/distance"
+            app:layout_constraintTop_toBottomOf="@+id/distance" />
 
         <TextView
             android:id="@+id/lon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="25dp"
             android:text="Longitude:"
-            app:layout_constraintBottom_toTopOf="@+id/lat"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintBottom_toTopOf="@+id/address"
+            app:layout_constraintEnd_toEndOf="@+id/lat"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/lat"
+            app:layout_constraintTop_toBottomOf="@+id/lat" />
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="25dp"
             android:text="Distance:"
-            app:layout_constraintBottom_toTopOf="@+id/address"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintBottom_toTopOf="@+id/lat"
+            app:layout_constraintEnd_toStartOf="@+id/currtime"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="250dp"
             android:text="Get"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lat" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/currtime"
+            app:layout_constraintStart_toStartOf="@+id/currtime"
+            app:layout_constraintTop_toBottomOf="@+id/currtime" />
 
         <TextView
             android:id="@+id/address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="25dp"
             android:gravity="center|center_horizontal"
+            android:maxEms="10"
             android:text="Address"
-            app:layout_constraintBottom_toTopOf="@+id/lon"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/lon"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/lon"
+            app:layout_constraintTop_toBottomOf="@+id/lon" />
 
         <TextView
             android:id="@+id/currtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
             android:text="Time: "
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lat" />
+            app:layout_constraintBottom_toTopOf="@+id/button"
+            app:layout_constraintEnd_toStartOf="@+id/fav"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/distance"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/recent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
+            android:maxEms="10"
             android:text="Recent:"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currtime" />
+            app:layout_constraintBottom_toTopOf="@+id/recenttime"
+            app:layout_constraintEnd_toEndOf="@+id/favtime"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/favtime"
+            app:layout_constraintTop_toBottomOf="@+id/favtime" />
 
         <TextView
             android:id="@+id/recenttime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
             android:text="Recent Time:"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/recent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/recent"
             app:layout_constraintTop_toBottomOf="@+id/recent" />
 
@@ -101,19 +108,22 @@
             android:id="@+id/fav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
+            android:maxEms="10"
             android:text="Favorite:"
-            app:layout_constraintEnd_toEndOf="@+id/recenttime"
-            app:layout_constraintStart_toStartOf="@+id/recenttime"
-            app:layout_constraintTop_toBottomOf="@id/recenttime" />
+            app:layout_constraintBottom_toTopOf="@+id/favtime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/currtime"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/favtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
             android:text="Fav Time:"
+            app:layout_constraintBottom_toTopOf="@+id/recent"
             app:layout_constraintEnd_toEndOf="@+id/fav"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/fav"
             app:layout_constraintTop_toBottomOf="@+id/fav" />
 
