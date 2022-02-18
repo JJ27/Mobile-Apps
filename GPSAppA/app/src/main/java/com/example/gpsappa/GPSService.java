@@ -2,60 +2,44 @@ package com.example.gpsappa;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Service;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Criteria;
+import android.content.res.Configuration;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.media.VolumeShaper;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Looper;
-import android.provider.Settings;
-import android.util.Log;
-import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.location.LocationRequestCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.gpsappa.databinding.ActivityMainBinding;
-import com.google.android.gms.common.api.GoogleApi;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.internal.OnConnectionFailedListener;
-import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 
 import java.io.IOException;
-import java.security.Provider;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class GPSService extends AppCompatActivity {
     private final Context context;
-    protected LocationManager locationManager;
     ActivityMainBinding binding;
     public static FusedLocationProviderClient fuse;
     public static LocationCallback callback;
@@ -65,8 +49,9 @@ public class GPSService extends AppCompatActivity {
     String fav;
     List<String> prevAddy;
     List<Stopwatch> times;
-    Location currLoc;
     List<Location> prevLoc;
+    ArrayList<String> recents;
+    ArrayList<Stopwatch> recenttimes;
     float totaldist;
 
     public float getTotaldist() {
@@ -83,10 +68,13 @@ public class GPSService extends AppCompatActivity {
         return recent;
     }
 
+    @SuppressLint("MissingPermission")
     public GPSService(Context context, int type, ActivityMainBinding binding) {
         this.context = context;
         this.binding = binding;
         this.totaldist = 0f;
+        recents = new ArrayList<String>();
+        recenttimes = new ArrayList<Stopwatch>();
         fav = null;
         fuse = LocationServices.getFusedLocationProviderClient(context);
         fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
@@ -183,22 +171,39 @@ public class GPSService extends AppCompatActivity {
                 current = gc.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1).get(0).getAddressLine(0);
                 if(recent != null && !recent.equals(current)) {
                     System.out.println("inner");
-                    binding.recent.setText("Recent: " + recent);
+                    System.out.println("Recent: " + recent);
+                    recents.add(0, recent);
+                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                        binding.recent.setText("Recent: " + recent);
                     try {
-                        binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
+                        recenttimes.add(0, times.get(prevAddy.indexOf(recent)));
+                        if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                            binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
                     } catch (ArrayIndexOutOfBoundsException e) {
                         e.printStackTrace();
                     }
                 }
             } else{
                 System.out.println("else");
-                binding.recent.setText("Recent: " + recent);
+                if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                    binding.recent.setText("Recent: " + recent);
+                System.out.println("Recent: " + recent);
+                if(recent != null)
+                    recents.add(0, recent);
                 try {
-                    binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
+                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                        binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
+                    recenttimes.add(0, times.get(prevAddy.indexOf(recent)));
                 } catch (ArrayIndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }
             }} catch (NullPointerException e){e.printStackTrace();}
+            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                RecyclerView recyclerView = binding.recycle;
+                recyclerView.setLayoutManager(new LinearLayoutManager(context));
+                CustomAdapter adapter = new CustomAdapter(recents, recenttimes);
+                recyclerView.setAdapter(adapter);
+            }
             binding.fav.setText("Favorite: " + fav);
             try{binding.favtime.setText("Fav Time: " + times.get(prevAddy.indexOf(fav)).elapsed(TimeUnit.SECONDS) + " s");} catch (ArrayIndexOutOfBoundsException e){e.printStackTrace();}
             current = gc.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1).get(0).getAddressLine(0);
@@ -251,6 +256,79 @@ public class GPSService extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
+    }
+
+    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
+
+        private ArrayList<String> recents;
+        private ArrayList<Stopwatch> times;
+
+        /**
+         * Provide a reference to the type of views that you are using
+         * (custom ViewHolder).
+         */
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            private final TextView recent;
+            private final TextView time;
+
+            public ViewHolder(View view) {
+                super(view);
+                // Define click listener for the ViewHolder's View
+
+                recent = (TextView) view.findViewById(R.id.recentview);
+                time = (TextView) view.findViewById(R.id.recenttimeview);
+            }
+
+            public TextView getRecent() {
+                return recent;
+            }
+
+            public TextView getTime() {
+                return time;
+            }
+        }
+
+        /**
+         * Initialize the dataset of the Adapter.
+         *
+         * @param dataSet String[] containing the data to populate views to be used
+         * by RecyclerView.
+         */
+        public CustomAdapter(ArrayList<String> recents, ArrayList<Stopwatch> times) {
+            this.recents = recents;
+            this.times = times;
+        }
+
+        // Create new views (invoked by the layout manager)
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+            // Create a new view, which defines the UI of the list item
+            View view = LayoutInflater.from(viewGroup.getContext())
+                    .inflate(R.layout.adapter_layout, viewGroup, false);
+
+            return new ViewHolder(view);
+        }
+
+
+        // Replace the contents of a view (invoked by the layout manager)
+        @Override
+        public void onBindViewHolder(ViewHolder viewHolder, final int position) {
+
+            // Get element from your dataset at this position and replace the
+            // contents of the view with that element
+            try {
+                viewHolder.getRecent().setText(recents.get(position));
+                viewHolder.getTime().setText(times.get(position).elapsed(TimeUnit.SECONDS) + " s");
+            } catch(IndexOutOfBoundsException e){e.printStackTrace();}
+        }
+
+        // Return the size of your dataset (invoked by the layout manager)
+        @Override
+        public int getItemCount() {
+            if(recents != null)
+                return recents.size();
+            return 0;
+        }
     }
 
 

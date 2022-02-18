@@ -24,7 +24,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.4" />
+            app:layout_constraintVertical_bias="0.3" />
 
         <TextView
             android:id="@+id/lon"
@@ -50,7 +50,7 @@
             android:id="@+id/button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="250dp"
+            android:layout_marginTop="300dp"
             android:text="Get"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -78,44 +78,35 @@
             app:layout_constraintTop_toBottomOf="@+id/lat" />
 
         <TextView
-            android:id="@+id/recent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:text="Recent:"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currtime" />
-
-        <TextView
-            android:id="@+id/recenttime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
-            android:text="Recent Time:"
-            app:layout_constraintEnd_toEndOf="@+id/recent"
-            app:layout_constraintStart_toStartOf="@+id/recent"
-            app:layout_constraintTop_toBottomOf="@+id/recent" />
-
-        <TextView
             android:id="@+id/fav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="60dp"
             android:text="Favorite:"
-            app:layout_constraintEnd_toEndOf="@+id/recenttime"
-            app:layout_constraintStart_toStartOf="@+id/recenttime"
-            app:layout_constraintTop_toBottomOf="@id/recenttime" />
+            app:layout_constraintEnd_toEndOf="@+id/currtime"
+            app:layout_constraintStart_toStartOf="@+id/currtime"
+            app:layout_constraintTop_toBottomOf="@id/recycle" />
 
         <TextView
             android:id="@+id/favtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="30dp"
             android:text="Fav Time:"
             app:layout_constraintEnd_toEndOf="@+id/fav"
+            app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="@+id/fav"
             app:layout_constraintTop_toBottomOf="@+id/fav" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycle"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/fav"
+            app:layout_constraintEnd_toEndOf="@+id/currtime"
+            app:layout_constraintStart_toStartOf="@+id/currtime"
+            app:layout_constraintTop_toBottomOf="@+id/currtime" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
