@@ -23,6 +23,26 @@ public class GPSApplication extends Application {
     private List<String> addresses;
     private List<Location> locations;
 
+    public List<String> getWayPointNames() {
+        return wayPointNames;
+    }
+
+    public void setWayPointNames(List<String> wayPointNames) {
+        this.wayPointNames = wayPointNames;
+    }
+
+    private List<String> wayPointNames;
+
+    public List<Location> getWaypoints() {
+        return waypoints;
+    }
+
+    public void setWaypoints(List<Location> waypoints) {
+        this.waypoints = waypoints;
+    }
+
+    private List<Location> waypoints;
+
     public List<Stopwatch> getTimes() {
         return times;
     }
@@ -52,5 +72,7 @@ public class GPSApplication extends Application {
         locations = new ArrayList<Location>();
         addresses = new ArrayList<String>();
         times = new ArrayList<Stopwatch>();
+        waypoints = new ArrayList<Location>();
+        wayPointNames = new ArrayList<String>();
     }
 }

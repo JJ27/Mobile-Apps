@@ -1,5 +1,7 @@
 package com.example.gpsappa;
 
+import static com.example.gpsappa.GPSService.fuse;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -7,10 +9,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentResultListener;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -20,6 +26,9 @@ import android.media.VolumeShaper;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -27,10 +36,34 @@ import com.example.gpsappa.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
     private GPSService gpsService;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.actionbar, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        DialogFragment zc = new WaypointFragment("Waypoint Name:");
+        zc.show(getSupportFragmentManager(),"Hello");
+        getSupportFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                if(requestKey.equals("requestKey")) {
+                    String name = result.getString("name");
+                    gpsService.setWaypoint(name);
+                }
+            }
+        });
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +86,42 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        binding.show.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               startActivity(new Intent(MainActivity.this, ShowWaypointList.class));
+            }
+        });
+        binding.newway.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gpsService.setWaypoint("Origin");
+                DialogFragment z2 = new WaypointFragment("Destination Name:");
+                z2.show(getSupportFragmentManager(),"Hello2");
+                getSupportFragmentManager().setFragmentResultListener("requestOther", MainActivity.this, new FragmentResultListener() {
+                    @Override
+                    public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                        GPSApplication app = (GPSApplication)getApplicationContext();
+                        List<Location> waypoints = app.getWaypoints();
+                        List<String> waypointNames = app.getWayPointNames();
+                        Location waypoint = waypoints.get(waypointNames.indexOf(result.getString("name")));
+                        Intent apiIntent = new Intent(MainActivity.this, APICall.class);
+                        apiIntent.putExtra("lat", gpsService.getCurrloc().getLatitude());
+                        apiIntent.putExtra("lon", gpsService.getCurrloc().getLongitude());
+                        apiIntent.putExtra("destlat", waypoint.getLatitude());
+                        apiIntent.putExtra("destlon", waypoint.getLongitude());
+                        startService(apiIntent);
+                    }
+                });
+            }
+        });
+        binding.map.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+            }
+        });
     }
     private ActivityResultLauncher<String[]> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), isGranted -> { });
 
@@ -69,12 +138,31 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        GPSService.fuse.removeLocationUpdates(GPSService.callback);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //startActivityForResult(new Intent(this, SignInActivity.class), 0);
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(fuse != null)
+            fuse.requestLocationUpdates(GPSService.locationRequest, GPSService.callback, Looper.getMainLooper());
+    }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         try {
-            GPSService.fuse.removeLocationUpdates(GPSService.callback);
+            fuse.removeLocationUpdates(GPSService.callback);
             outState.putFloat("dist", gpsService.getTotaldist());
             outState.putString("curr", gpsService.getCurrent());
             outState.putString("fav", gpsService.getFav());

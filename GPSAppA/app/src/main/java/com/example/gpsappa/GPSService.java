@@ -44,12 +44,13 @@ public class GPSService extends AppCompatActivity {
     public static FusedLocationProviderClient fuse;
     public static LocationCallback callback;
     public static LocationRequest locationRequest;
-    String current;
-    String recent;
-    String fav;
+    Location currloc;
+    String current, recent, fav;
     List<String> prevAddy;
     List<Stopwatch> times;
     List<Location> prevLoc;
+    List<Location> waypoints;
+    List<String> waypointNames;
     ArrayList<String> recents;
     ArrayList<Stopwatch> recenttimes;
     float totaldist;
@@ -63,9 +64,11 @@ public class GPSService extends AppCompatActivity {
     public String getFav() {
         return fav;
     }
-
     public String getRecent() {
         return recent;
+    }
+    public Location getCurrloc() {
+        return currloc;
     }
 
     @SuppressLint("MissingPermission")
@@ -77,12 +80,12 @@ public class GPSService extends AppCompatActivity {
         recenttimes = new ArrayList<Stopwatch>();
         fav = null;
         fuse = LocationServices.getFusedLocationProviderClient(context);
-        fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
+        /*fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
                     updateUI(location);
                 }
-            });
+            });*/
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -107,12 +110,12 @@ public class GPSService extends AppCompatActivity {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
         } else{
-            fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
+            /*fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
                     updateUI(location);
                 }
-            });
+            });*/
         }
         callback = new LocationCallback() {
             @Override
@@ -128,6 +131,7 @@ public class GPSService extends AppCompatActivity {
     public void updateUI(Location loc){
         binding.lat.setText("Latitude: " + loc.getLatitude());
         binding.lon.setText("Longitude: " + loc.getLongitude());
+        currloc = loc;
         //TODO: Include speed using loc.hasSpeed() and loc.getSpeed()
         Geocoder gc = new Geocoder(context);
         GPSApplication app = (GPSApplication) context.getApplicationContext();
@@ -169,7 +173,7 @@ public class GPSService extends AppCompatActivity {
                 recent = current;
                 System.out.println("if");
                 current = gc.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1).get(0).getAddressLine(0);
-                if(recent != null && !recent.equals(current)) {
+                if(recent != null && !recent.equals(current) && (times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.MILLISECONDS) >= 2)) {
                     System.out.println("inner");
                     System.out.println("Recent: " + recent);
                     recents.add(0, recent);
@@ -188,22 +192,17 @@ public class GPSService extends AppCompatActivity {
                 if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
                     binding.recent.setText("Recent: " + recent);
                 System.out.println("Recent: " + recent);
-                if(recent != null)
+                if(recent != null && (times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.MILLISECONDS) >= 2))
                     recents.add(0, recent);
                 try {
                     if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
                         binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
-                    recenttimes.add(0, times.get(prevAddy.indexOf(recent)));
+                    if((times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.MILLISECONDS) >= 2))
+                        recenttimes.add(0, times.get(prevAddy.indexOf(recent)));
                 } catch (ArrayIndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }
             }} catch (NullPointerException e){e.printStackTrace();}
-            if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                RecyclerView recyclerView = binding.recycle;
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-                CustomAdapter adapter = new CustomAdapter(recents, recenttimes);
-                recyclerView.setAdapter(adapter);
-            }
             binding.fav.setText("Favorite: " + fav);
             try{binding.favtime.setText("Fav Time: " + times.get(prevAddy.indexOf(fav)).elapsed(TimeUnit.SECONDS) + " s");} catch (ArrayIndexOutOfBoundsException e){e.printStackTrace();}
             current = gc.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1).get(0).getAddressLine(0);
@@ -252,84 +251,20 @@ public class GPSService extends AppCompatActivity {
         fuse.removeLocationUpdates(callback);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onResume() {
         super.onResume();
         fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
     }
 
-    public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder> {
-
-        private ArrayList<String> recents;
-        private ArrayList<Stopwatch> times;
-
-        /**
-         * Provide a reference to the type of views that you are using
-         * (custom ViewHolder).
-         */
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            private final TextView recent;
-            private final TextView time;
-
-            public ViewHolder(View view) {
-                super(view);
-                // Define click listener for the ViewHolder's View
-
-                recent = (TextView) view.findViewById(R.id.recentview);
-                time = (TextView) view.findViewById(R.id.recenttimeview);
-            }
-
-            public TextView getRecent() {
-                return recent;
-            }
-
-            public TextView getTime() {
-                return time;
-            }
-        }
-
-        /**
-         * Initialize the dataset of the Adapter.
-         *
-         * @param dataSet String[] containing the data to populate views to be used
-         * by RecyclerView.
-         */
-        public CustomAdapter(ArrayList<String> recents, ArrayList<Stopwatch> times) {
-            this.recents = recents;
-            this.times = times;
-        }
-
-        // Create new views (invoked by the layout manager)
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-            // Create a new view, which defines the UI of the list item
-            View view = LayoutInflater.from(viewGroup.getContext())
-                    .inflate(R.layout.adapter_layout, viewGroup, false);
-
-            return new ViewHolder(view);
-        }
-
-
-        // Replace the contents of a view (invoked by the layout manager)
-        @Override
-        public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-
-            // Get element from your dataset at this position and replace the
-            // contents of the view with that element
-            try {
-                viewHolder.getRecent().setText(recents.get(position));
-                viewHolder.getTime().setText(times.get(position).elapsed(TimeUnit.SECONDS) + " s");
-            } catch(IndexOutOfBoundsException e){e.printStackTrace();}
-        }
-
-        // Return the size of your dataset (invoked by the layout manager)
-        @Override
-        public int getItemCount() {
-            if(recents != null)
-                return recents.size();
-            return 0;
+    public void setWaypoint(String name) {
+        GPSApplication app = (GPSApplication) context.getApplicationContext();
+        waypoints = app.getWaypoints();
+        waypointNames = app.getWayPointNames();
+        if(currloc != null) {
+            waypoints.add(currloc);
+            waypointNames.add(name);
         }
     }
-
-
 }
