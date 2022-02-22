@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.gpsappa.databinding.ActivityMapsBinding;
@@ -29,6 +30,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     List<Location> waypoints;
     List<String> waypointNames;
     static String polyline;
+    static LatLng boundsw, boundne;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,9 +68,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.addMarker(new MarkerOptions().position(latLng).title(waypointNames.get(i)));
             lastloc = latLng;
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastloc, 8f));
-        if(polyline != null)
+        if(polyline != null) {
             drawRoutes(polyline);
+            moveCamera();
+        } else{
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastloc, 8f));
+        }
+    }
+
+    private void moveCamera() {
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                LatLngBounds bounds = new LatLngBounds.Builder()
+                        .include(boundsw)
+                        .include(boundne)
+                        .build();
+                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
+            }
+        });
     }
 
     private void drawRoutes(String s){
@@ -83,6 +101,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     public static void setPolyline(String polyline) {
         MapsActivity.polyline = polyline;
+    }
+    public static void setBounds(LatLng boundsw, LatLng boundne) {
+        MapsActivity.boundsw = boundsw;
+        MapsActivity.boundne = boundne;
     }
     public class APIReceiver extends BroadcastReceiver{
         @Override
