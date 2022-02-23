@@ -177,34 +177,29 @@ public class GPSService extends AppCompatActivity {
                     System.out.println("inner");
                     System.out.println("Recent: " + recent);
                     recents.add(0, recent);
-                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-                        binding.recent.setText("Recent: " + recent);
+                    binding.recent.setText(recent);
                     try {
                         recenttimes.add(0, times.get(prevAddy.indexOf(recent)));
-                        if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-                            binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
+                        binding.recent.setText(binding.recent.getText().toString() + " (" + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s)");
                     } catch (ArrayIndexOutOfBoundsException e) {
                         e.printStackTrace();
                     }
                 }
             } else{
                 System.out.println("else");
-                if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-                    binding.recent.setText("Recent: " + recent);
+                binding.recent.setText(recent);
                 System.out.println("Recent: " + recent);
                 if(recent != null && (times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.MILLISECONDS) >= 2))
                     recents.add(0, recent);
                 try {
-                    if(context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
-                        binding.recenttime.setText("Recent Time: " + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s");
+                    binding.recent.setText(binding.recent.getText().toString() + " (" + times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.SECONDS) + " s)");
                     if((times.get(prevAddy.indexOf(recent)).elapsed(TimeUnit.MILLISECONDS) >= 2))
                         recenttimes.add(0, times.get(prevAddy.indexOf(recent)));
                 } catch (ArrayIndexOutOfBoundsException e) {
                     e.printStackTrace();
                 }
             }} catch (NullPointerException e){e.printStackTrace();}
-            binding.fav.setText("Favorite: " + fav);
-            try{binding.favtime.setText("Fav Time: " + times.get(prevAddy.indexOf(fav)).elapsed(TimeUnit.SECONDS) + " s");} catch (ArrayIndexOutOfBoundsException e){e.printStackTrace();}
+            try{binding.fav.setText(fav  + " (" + times.get(prevAddy.indexOf(fav)).elapsed(TimeUnit.SECONDS) + " s)");} catch (ArrayIndexOutOfBoundsException e){e.printStackTrace();}
             current = gc.getFromLocation(loc.getLatitude(),loc.getLongitude(), 1).get(0).getAddressLine(0);
             if(prevAddy.contains(current)){
                 if(!times.get(prevAddy.indexOf(current)).isRunning())

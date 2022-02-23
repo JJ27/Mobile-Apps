@@ -50,52 +50,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        DialogFragment zc = new WaypointFragment("Waypoint Name:");
-        zc.show(getSupportFragmentManager(),"Hello");
-        getSupportFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                if(requestKey.equals("requestKey")) {
-                    String name = result.getString("name");
-                    gpsService.setWaypoint(name);
-                }
-            }
-        });
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("Denied");
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
-        }
-        binding.button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        switch(item.getItemId()){
+            case R.id.addwaypoint:
+                DialogFragment zc = new WaypointFragment("Waypoint Name:");
+                zc.show(getSupportFragmentManager(),"Hello");
+                getSupportFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+                    @Override
+                    public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                        if(requestKey.equals("requestKey")) {
+                            String name = result.getString("name");
+                            gpsService.setWaypoint(name);
+                        }
+                    }
+                });
+                break;
+            case R.id.getloc:
                 try {
                     getLoc();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        });
-
-        binding.show.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               startActivity(new Intent(MainActivity.this, ShowWaypointList.class));
-            }
-        });
-        binding.newway.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                break;
+            case R.id.startmap:
+                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                break;
+            case R.id.startroute:
                 gpsService.setWaypoint("Origin");
                 DialogFragment z2 = new WaypointFragment("Destination Name:");
                 z2.show(getSupportFragmentManager(),"Hello2");
@@ -114,17 +93,23 @@ public class MainActivity extends AppCompatActivity {
                         startService(apiIntent);
                     }
                 });
-            }
-        });
-        binding.map.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, MapsActivity.class));
-            }
-        });
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
-    private ActivityResultLauncher<String[]> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), isGranted -> { });
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            System.out.println("Denied");
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+                ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+        }
+    }
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
@@ -189,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 } else{
-                    Toast.makeText(this, "This app requires location permissions!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "This app requires location permissions!", Toast.LENGTH_LONG).show();
                     finish();
                 }
                 break;

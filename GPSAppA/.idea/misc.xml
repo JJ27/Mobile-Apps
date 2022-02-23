@@ -10,10 +10,11 @@
         <entry key="app/src/main/res/layout-w1240dp/activity_google_sign_in.xml" value="0.1" />
         <entry key="app/src/main/res/layout-w936dp/activity_google_sign_in.xml" value="0.10997267759562841" />
         <entry key="app/src/main/res/layout/activity_google_sign_in.xml" value="0.14583333333333334" />
-        <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.23703703703703705" />
         <entry key="app/src/main/res/layout/activity_maps.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_show_waypoint_list.xml" value="0.165" />
         <entry key="app/src/main/res/layout/activity_sign_in.xml" value="0.1328125" />
+        <entry key="app/src/main/res/layout/adapter_layout.xml" value="0.1" />
         <entry key="app/src/main/res/layout/fragment_dialog.xml" value="0.14583333333333334" />
       </map>
     </option>

@@ -18,6 +18,7 @@
         android:theme="@style/Theme.GPSAppA">
         <activity
             android:name=".SignInActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,9 +41,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDfN0N_1sFGr6l-3U2yTl0ZWfN5Qv3g5pA" />
 
-        <activity
-            android:name=".ShowWaypointList"
-            android:exported="false" />
         <activity
             android:name=".MapsActivity"
             android:exported="false" />
