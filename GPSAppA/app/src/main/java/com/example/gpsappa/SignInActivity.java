@@ -1,12 +1,9 @@
 package com.example.gpsappa;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -27,7 +24,6 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             System.out.println("Already signed in!");
         else
             System.out.println("Not signed in yet!");
-        //updateUI(account);
     }
 
     @Override
@@ -56,11 +52,7 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == 999) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }
@@ -73,14 +65,8 @@ public class SignInActivity extends AppCompatActivity implements View.OnClickLis
             finish();
             System.out.println("Starting Normal GPS");
             startActivity(new Intent(this, MainActivity.class));
-            // Signed in successfully, show authenticated UI.
-            //updateUI(account);
         } catch (ApiException e) {
             e.printStackTrace();
-            // The ApiException status code indicates the detailed failure reason.
-            // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            //updateUI(null);
         }
     }
 }

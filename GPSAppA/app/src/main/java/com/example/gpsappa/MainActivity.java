@@ -2,12 +2,9 @@ package com.example.gpsappa;
 
 import static com.example.gpsappa.GPSService.fuse;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -15,25 +12,17 @@ import androidx.fragment.app.FragmentResultListener;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationRequest;
-import android.media.VolumeShaper;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.example.gpsappa.databinding.ActivityMainBinding;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.IOException;
 import java.util.List;
@@ -84,13 +73,17 @@ public class MainActivity extends AppCompatActivity {
                         GPSApplication app = (GPSApplication)getApplicationContext();
                         List<Location> waypoints = app.getWaypoints();
                         List<String> waypointNames = app.getWayPointNames();
-                        Location waypoint = waypoints.get(waypointNames.indexOf(result.getString("name")));
-                        Intent apiIntent = new Intent(MainActivity.this, APICall.class);
-                        apiIntent.putExtra("lat", gpsService.getCurrloc().getLatitude());
-                        apiIntent.putExtra("lon", gpsService.getCurrloc().getLongitude());
-                        apiIntent.putExtra("destlat", waypoint.getLatitude());
-                        apiIntent.putExtra("destlon", waypoint.getLongitude());
-                        startService(apiIntent);
+                        try {
+                            Location waypoint = waypoints.get(waypointNames.indexOf(result.getString("name")));
+                            Intent apiIntent = new Intent(MainActivity.this, APICall.class);
+                            apiIntent.putExtra("lat", gpsService.getCurrloc().getLatitude());
+                            apiIntent.putExtra("lon", gpsService.getCurrloc().getLongitude());
+                            apiIntent.putExtra("destlat", waypoint.getLatitude());
+                            apiIntent.putExtra("destlon", waypoint.getLongitude());
+                            startService(apiIntent);
+                        } catch(Exception e){
+                            Toast.makeText(MainActivity.this, "Invalid WayPoint", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
                 break;
@@ -114,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         try {
-            gpsService = new GPSService(MainActivity.this, 1, binding, savedInstanceState.getFloat("dist"), savedInstanceState.getString("curr"), savedInstanceState.getString("fav"), savedInstanceState.getString("rec"));
+            gpsService = new GPSService(MainActivity.this, 1, binding, savedInstanceState.getFloat("dist"), savedInstanceState.getString("curr"), savedInstanceState.getString("fav"), savedInstanceState.getString("rec"), savedInstanceState.getStringArrayList("recs"));
         } catch (NullPointerException e) {
             try {
                 getLoc();
@@ -126,13 +119,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GPSService.fuse.removeLocationUpdates(GPSService.callback);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //startActivityForResult(new Intent(this, SignInActivity.class), 0);
+        if(GPSService.fuse != null)
+            GPSService.fuse.removeLocationUpdates(GPSService.callback);
     }
 
     @SuppressLint("MissingPermission")
@@ -152,15 +140,12 @@ public class MainActivity extends AppCompatActivity {
             outState.putString("curr", gpsService.getCurrent());
             outState.putString("fav", gpsService.getFav());
             outState.putString("rec", gpsService.getRecent());
+            outState.putStringArrayList("recs", gpsService.getRecents());
         } catch(NullPointerException e){}
     }
 
     public void getLoc() throws IOException {
         gpsService = new GPSService(MainActivity.this, 1, binding);
-        /*binding.lat.setText("Latitude: " + String.valueOf(gpsService.getLocation().getLatitude()));
-        binding.lon.setText("Longitude: " + String.valueOf(gpsService.getLocation().getLongitude()));
-        Address address = geocoder.getFromLocation(gpsService.getLocation().getLatitude(), gpsService.getLocation().getLongitude(),1).get(0);
-        binding.address.setText("Address: " + address.getAddressLine(0).trim());*/
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

@@ -52,6 +52,11 @@ public class GPSApplication extends Application {
     }
 
     private List<Stopwatch> times;
+    private ArrayList<Stopwatch> recenttimes;
+
+    public ArrayList<Stopwatch> getRecenttimes() {
+        return recenttimes;
+    }
 
     public List<Location> getLocations() {
         return locations;
@@ -74,5 +79,6 @@ public class GPSApplication extends Application {
         times = new ArrayList<Stopwatch>();
         waypoints = new ArrayList<Location>();
         wayPointNames = new ArrayList<String>();
+        recenttimes = new ArrayList<Stopwatch>();
     }
 }

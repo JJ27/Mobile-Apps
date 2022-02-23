@@ -1,6 +1,5 @@
 package com.example.gpsappa;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.BroadcastReceiver;
@@ -8,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -16,7 +14,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.gpsappa.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -91,7 +88,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void drawRoutes(String s){
         s = s.replaceAll("\"","");
-        Log.d("ELSE", s);
         mMap.addPolyline(new PolylineOptions()
             .color(R.color.black)
             .width(10f)

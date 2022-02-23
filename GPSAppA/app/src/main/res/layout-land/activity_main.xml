@@ -11,122 +11,271 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="30dp"
         android:background="@drawable/b1"
+        android:paddingVertical="15dp"
         tools:context=".MainActivity">
 
-        <TextView
-            android:id="@+id/lat"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Latitude:"
-            app:layout_constraintBottom_toTopOf="@+id/lon"
-            app:layout_constraintEnd_toEndOf="@+id/distance"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/distance"
-            app:layout_constraintTop_toBottomOf="@+id/distance" />
-
-        <TextView
-            android:id="@+id/lon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Longitude:"
-            app:layout_constraintBottom_toTopOf="@+id/address"
-            app:layout_constraintEnd_toEndOf="@+id/lat"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/lat"
-            app:layout_constraintTop_toBottomOf="@+id/lat" />
-
-        <TextView
-            android:id="@+id/distance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Distance:"
-            app:layout_constraintBottom_toTopOf="@+id/lat"
-            app:layout_constraintEnd_toStartOf="@+id/currtime"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/distcard"
+            android:layout_width="280dp"
+            android:layout_height="60dp"
+            android:alpha="0.8"
+            app:cardCornerRadius="200dp"
+            app:cardElevation="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/addresscard"
+            app:layout_constraintEnd_toStartOf="@+id/timecard"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/distimg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/distance"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/distance"
+                    app:srcCompat="@drawable/distance" />
+
+                <TextView
+                    android:id="@+id/distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Distance:"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/distimg"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/addresscard"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:alpha="0.8"
+            app:cardCornerRadius="35dp"
+            app:cardElevation="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/locationcard"
+            app:layout_constraintEnd_toEndOf="@+id/distcard"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/distcard"
+            app:layout_constraintTop_toBottomOf="@+id/distcard">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/addimg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/address"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/address"
+                    app:srcCompat="@drawable/locationaddress" />
+
+                <TextView
+                    android:id="@+id/address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:maxEms="10"
+                    android:text="Address:"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/addimg"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/locationcard"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:alpha="0.8"
+            app:cardCornerRadius="35dp"
+            app:cardElevation="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/currtime"
-            app:layout_constraintStart_toStartOf="@+id/currtime"
-            app:layout_constraintTop_toBottomOf="@+id/currtime" />
-
-        <TextView
-            android:id="@+id/address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center|center_horizontal"
-            android:maxEms="10"
-            android:text="Address"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/lon"
+            app:layout_constraintEnd_toEndOf="@+id/distcard"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/lon"
-            app:layout_constraintTop_toBottomOf="@+id/lon" />
+            app:layout_constraintStart_toStartOf="@+id/distcard"
+            app:layout_constraintTop_toBottomOf="@+id/addresscard">
 
-        <TextView
-            android:id="@+id/currtime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Time: "
-            app:layout_constraintBottom_toTopOf="@+id/button"
-            app:layout_constraintEnd_toStartOf="@+id/fav"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/distance"
-            app:layout_constraintTop_toTopOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/recent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxEms="10"
-            android:text="Recent:"
-            app:layout_constraintBottom_toTopOf="@+id/recenttime"
-            app:layout_constraintEnd_toEndOf="@+id/favtime"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/favtime"
-            app:layout_constraintTop_toBottomOf="@+id/favtime" />
+                <ImageView
+                    android:id="@+id/latimg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/lat"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/lon"
+                    app:srcCompat="@drawable/location" />
 
-        <TextView
-            android:id="@+id/recenttime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Recent Time:"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/recent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/recent"
-            app:layout_constraintTop_toBottomOf="@+id/recent" />
+                <TextView
+                    android:id="@+id/lat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:maxEms="10"
+                    android:text="Latitude:"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/latimg"
+                    app:layout_constraintTop_toBottomOf="@+id/lon" />
 
-        <TextView
-            android:id="@+id/fav"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxEms="10"
-            android:text="Favorite:"
-            app:layout_constraintBottom_toTopOf="@+id/favtime"
+                <TextView
+                    android:id="@+id/lon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxEms="10"
+                    android:text="Longitude:"
+                    app:layout_constraintBottom_toTopOf="@+id/lat"
+                    app:layout_constraintEnd_toEndOf="@+id/lat"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="@+id/lat"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/timecard"
+            android:layout_width="280dp"
+            android:layout_height="60dp"
+            android:alpha="0.8"
+            app:cardCornerRadius="35dp"
+            app:cardElevation="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/favcard"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/currtime"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/distcard"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/favtime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Fav Time:"
-            app:layout_constraintBottom_toTopOf="@+id/recent"
-            app:layout_constraintEnd_toEndOf="@+id/fav"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/timeimg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/currtime"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/currtime"
+                    app:srcCompat="@drawable/loctime" />
+
+                <TextView
+                    android:id="@+id/currtime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:maxEms="10"
+                    android:text="Time:"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/timeimg"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/favcard"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:alpha="0.8"
+            app:cardCornerRadius="35dp"
+            app:cardElevation="12dp"
+            app:layout_constraintBottom_toTopOf="@+id/recentcard"
+            app:layout_constraintEnd_toEndOf="@+id/timecard"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="@+id/fav"
-            app:layout_constraintTop_toBottomOf="@+id/fav" />
+            app:layout_constraintStart_toStartOf="@+id/timecard"
+            app:layout_constraintTop_toBottomOf="@+id/timecard">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/favimg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/fav"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/fav"
+                    app:srcCompat="@drawable/favlocation" />
+
+                <TextView
+                    android:id="@+id/fav"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:maxEms="10"
+                    android:text="Favorite:"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/favimg"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/recentcard"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:alpha="0.8"
+            app:cardCornerRadius="35dp"
+            app:cardElevation="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/favcard"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="@+id/favcard"
+            app:layout_constraintTop_toBottomOf="@+id/favcard">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/recentimg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="60dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/recent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/recent"
+                    app:srcCompat="@drawable/recentloc" />
+
+                <TextView
+                    android:id="@+id/recent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:maxEms="10"
+                    android:text="Recent:"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/recentimg"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

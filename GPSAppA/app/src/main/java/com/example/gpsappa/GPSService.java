@@ -6,22 +6,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.location.Geocoder;
 import android.location.Location;
-import android.media.VolumeShaper;
 import android.os.Build;
 import android.os.Looper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.gpsappa.databinding.ActivityMainBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -29,7 +21,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Ticker;
 
@@ -70,6 +61,12 @@ public class GPSService extends AppCompatActivity {
     public Location getCurrloc() {
         return currloc;
     }
+    public ArrayList<String> getRecents() {
+        return recents;
+    }
+    public ArrayList<Stopwatch> getRecenttimes() {
+        return recenttimes;
+    }
 
     @SuppressLint("MissingPermission")
     public GPSService(Context context, int type, ActivityMainBinding binding) {
@@ -80,12 +77,6 @@ public class GPSService extends AppCompatActivity {
         recenttimes = new ArrayList<Stopwatch>();
         fav = null;
         fuse = LocationServices.getFusedLocationProviderClient(context);
-        /*fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    updateUI(location);
-                }
-            });*/
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -97,25 +88,19 @@ public class GPSService extends AppCompatActivity {
         fuse.requestLocationUpdates(locationRequest, callback, Looper.getMainLooper());
     }
 
-    public GPSService(Context context, int type, ActivityMainBinding binding, float dist, String current, String fav, String rec) {
+    public GPSService(Context context, int type, ActivityMainBinding binding, float dist, String current, String fav, String rec, ArrayList<String> recs) {
         this.context = context;
         this.binding = binding;
         this.totaldist = dist;
         this.current = current;
         this.fav = fav;
         this.recent = rec;
+        this.recents = recs;
         fuse = LocationServices.getFusedLocationProviderClient(context);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            System.out.println("Denied");
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 101);
         } else{
-            /*fuse.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    updateUI(location);
-                }
-            });*/
         }
         callback = new LocationCallback() {
             @Override
@@ -132,12 +117,12 @@ public class GPSService extends AppCompatActivity {
         binding.lat.setText("Latitude: " + loc.getLatitude());
         binding.lon.setText("Longitude: " + loc.getLongitude());
         currloc = loc;
-        //TODO: Include speed using loc.hasSpeed() and loc.getSpeed()
         Geocoder gc = new Geocoder(context);
         GPSApplication app = (GPSApplication) context.getApplicationContext();
         times = app.getTimes();
         prevLoc = app.getLocations();
         prevAddy = app.getAddresses();
+        recenttimes = app.getRecenttimes();
         Runnable count = new Runnable() {
             @Override
             public void run() {
