@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="false"
+        android:layout_marginRight="0dp"
+        android:gravity="center_horizontal"
+        tools:context=".MainActivity">
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/rgroup"
+            android:layout_alignRight="@id/rgroup"
+            android:layout_centerHorizontal="false"
+            android:layout_marginTop="50dp"
+            android:gravity="center"
+            android:text="Josh Joseph" />
+
+        <TextView
+            android:id="@+id/block"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/name"
+            android:layout_alignTop="@id/name"
+            android:layout_alignRight="@id/name"
+            android:layout_marginTop="20dp"
+            android:gravity="center_horizontal"
+            android:text="Block 2B" />
+
+        <RadioGroup
+            android:id="@+id/rgroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/run"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentRight="false"
+            android:layout_marginBottom="100dp"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/toast"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Toast" />
+
+            <RadioButton
+                android:id="@+id/colorchange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Change Color" />
+
+            <RadioButton
+                android:id="@+id/uppercase"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="UPPERCASE" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/run"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/rgroup"
+            android:layout_centerInParent="true"
+            android:layout_marginLeft="30dp"
+            android:layout_weight="1"
+            android:text="Run" />
+
+        <Button
+            android:id="@+id/launcher"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignRight="@id/rgroup"
+            android:layout_alignBottom="@id/run"
+            android:layout_centerHorizontal="false"
+            android:layout_marginRight="30dp"
+            android:layout_weight="1"
+            android:text="Launch App" />
+
+    </RelativeLayout>
+</layout>
