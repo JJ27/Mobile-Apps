@@ -10,16 +10,69 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@drawable/hpbgc"
         tools:context=".MainActivity">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Hello World!"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:weightSum="3">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="125dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="100dp">
+
+                    <ImageView
+                        android:id="@+id/i00"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/lucmalfoynew" />
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="125dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="100dp">
+
+                    <ImageView
+                        android:id="@+id/i01"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/lucmalfoynew" />
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="0dp"
+                    android:layout_height="125dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1"
+                    app:cardCornerRadius="100dp">
+
+                    <ImageView
+                        android:id="@+id/i02"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:srcCompat="@drawable/lucmalfoynew" />
+                </androidx.cardview.widget.CardView>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </TableLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
