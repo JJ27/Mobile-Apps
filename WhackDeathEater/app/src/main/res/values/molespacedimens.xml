@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="placementspacing">5dp</dimen>
+    <dimen name="placementmargin">15dp</dimen>
+</resources>
