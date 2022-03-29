@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../../layout/custom_preview.xml" value="0.24166666666666667" />
         <entry key="..\:/Users/10016853/Documents/GitHub/Mobile-Apps/WhackDeathEater/app/src/main/res/layout/activity_main.xml" value="0.2441123188405797" />
+        <entry key="app/src/main/res/layout/activity_boss.xml" value="0.14375" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.15760869565217392" />
       </map>
     </option>

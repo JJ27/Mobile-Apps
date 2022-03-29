@@ -8,6 +8,7 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/hpbgc"
@@ -21,18 +22,32 @@
             android:text="0:60"
             android:textSize="35sp"
             app:layout_constraintBottom_toTopOf="@+id/progressBar"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/score"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/harry"
+            android:text="Score: 0"
+            android:textSize="35sp"
+            app:layout_constraintBottom_toBottomOf="@+id/timedisplay"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/timedisplay"
+            app:layout_constraintTop_toTopOf="@+id/timedisplay" />
+
         <ProgressBar
             android:id="@+id/progressBar"
-            android:scaleY="3"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="60"
             android:progress="60"
+            android:scaleY="3"
             app:layout_constraintBottom_toTopOf="@+id/tableLayout"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -79,8 +94,7 @@
                             android:id="@+id/i00"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                             />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -109,8 +123,7 @@
                             android:id="@+id/i01"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -139,8 +152,7 @@
                             android:id="@+id/i02"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </TableRow>
@@ -177,8 +189,7 @@
                             android:id="@+id/i10"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -207,8 +218,7 @@
                             android:id="@+id/i11"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -237,8 +247,7 @@
                             android:id="@+id/i12"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </TableRow>
@@ -275,8 +284,7 @@
                             android:id="@+id/i20"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -305,8 +313,7 @@
                             android:id="@+id/i21"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -335,8 +342,7 @@
                             android:id="@+id/i22"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:clickable="true"
-                            />
+                            android:clickable="true" />
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </TableRow>

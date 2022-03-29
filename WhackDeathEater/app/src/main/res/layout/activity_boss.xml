@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/hpbgc"
+        tools:context=".BossActivity">
+
+
+        <TextView
+            android:id="@+id/hpdisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/harry"
+            android:text="Harry Potter"
+            android:textSize="80sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/gametitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/harry"
+            android:text="Whack a Death Eater"
+            android:textSize="50sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toLeftOf="@id/hpdisplay"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/hpdisplay" />
+
+        <TextView
+            android:id="@+id/scoredisplay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp"
+            android:fontFamily="@font/harry"
+            android:text="Score :"
+            android:textSize="90sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/gametitle" />
+
+        <Button
+            android:id="@+id/playagain"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:layout_marginTop="50dp"
+            android:fontFamily="@font/harry"
+            android:text="Stop Music"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="@+id/scoredisplay"
+            app:layout_constraintStart_toStartOf="@+id/scoredisplay"
+            app:layout_constraintTop_toBottomOf="@id/scoredisplay" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
