@@ -34,18 +34,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends AppCompatActivity{
     ActivityMainBinding binding;
     final ScheduledExecutorService service = Executors.newScheduledThreadPool(10);
     ScheduledFuture<?> cancelHandler;
     Runnable cancel;
-    public static int timeLeft = 60;
+    public static AtomicInteger timeLeft;
     final TranslateAnimation tA = new TranslateAnimation(0,0,200,0);
     ScheduledFuture<?> moleHandler;
     final TranslateAnimation tA2 = new TranslateAnimation(0,0,0,200);
     final TranslateAnimation tA3 = new TranslateAnimation(0,0,0,200);
-    static int score = 0;
+    AtomicInteger score;
     static float offset = 0;
     static boolean voldy = false;
     static boolean ran = false;
@@ -57,6 +58,8 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        score = new AtomicInteger(0);
+        timeLeft = new AtomicInteger(60);
         setTimer();
         tA.setDuration(600);
         tA2.setDuration(600);
@@ -78,7 +81,7 @@ public class MainActivity extends AppCompatActivity{
                         if(c.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.cup).getConstantState()){
                             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(MainActivity.this);
                             Intent intent = new Intent(MainActivity.this, BossActivity.class);
-                            intent.putExtra("score", score);
+                            intent.putExtra("score", score.get());
                             startActivity(intent, options.toBundle());
                         }
                         if(c.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.bellatrix).getConstantState()){
@@ -93,14 +96,14 @@ public class MainActivity extends AppCompatActivity{
                             generateImage(R.drawable.ran);
                         }
                         if(c.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.voldy).getConstantState()){
-                            score += 10;
+                            score.getAndAdd(10);
                             binding.score.setText("Score: " + score);
                         } else if(c.getDrawable().getConstantState() == getResources().getDrawable(R.drawable.ran).getConstantState()){
                             changeTime(-5);
-                            score -= 3;
+                            score.addAndGet(-3);
                             binding.score.setText("Score: " + score);
                         } else
-                            binding.score.setText("Score: " + (++score));
+                            binding.score.setText("Score: " + score.addAndGet(1));
                     }
                 });
             }
@@ -178,24 +181,24 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void run() {
                         android.os.Process.setThreadPriority(Thread.MAX_PRIORITY);
-                        if(timeLeft > 9)
-                            binding.timedisplay.setText("0:" + timeLeft);
+                        if(timeLeft.get() > 9)
+                            binding.timedisplay.setText("0:" + timeLeft.get());
                         else
-                            binding.timedisplay.setText("0:0" + timeLeft);
-                        binding.progressBar.setProgress(timeLeft);
+                            binding.timedisplay.setText("0:0" + timeLeft.get());
+                        binding.progressBar.setProgress(timeLeft.get());
                         LayerDrawable progressBarDrawable = (LayerDrawable) binding.progressBar.getProgressDrawable();
                         Drawable backgroundDrawable = progressBarDrawable.getDrawable(0);
                         Drawable progressDrawable = progressBarDrawable.getDrawable(1);
                         String hexback = "", hexfore = "";
-                        if(timeLeft <= 15){
+                        if(timeLeft.get() <= 15){
                             //Gryffindor
                             hexback = "#D3A625";
                             hexfore = "#740001";
-                        } else if(timeLeft <= 30){
+                        } else if(timeLeft.get() <= 30){
                             //Hufflepuff
                             hexback = "#000000";
                             hexfore = "#FFD800";
-                        } else if(timeLeft <= 45){
+                        } else if(timeLeft.get() <= 45){
                             //Slytherin
                             hexback = "#5D5D5D";
                             hexfore = "#1A472A";
@@ -211,7 +214,7 @@ public class MainActivity extends AppCompatActivity{
                         binding.progressBar.setProgressTintList(ColorStateList.valueOf(Color.parseColor(hexfore)));
                     }
                 });
-                timeLeft--;
+                timeLeft.getAndAdd(-1);
             }
         };
         ScheduledFuture<?> handler = service.scheduleAtFixedRate(timer, 1,1, TimeUnit.SECONDS);
@@ -236,13 +239,13 @@ public class MainActivity extends AppCompatActivity{
                 moleHandler.cancel(false);
             }
         };
-        cancelHandler = service.schedule(cancel, timeLeft, TimeUnit.SECONDS);
+        cancelHandler = service.schedule(cancel, timeLeft.get(), TimeUnit.SECONDS);
     }
     public void changeTime(int z){
         cancelHandler.cancel(false);
-        timeLeft += z;
-        if(timeLeft < 0) timeLeft = 0;
-        cancelHandler = service.schedule(cancel, timeLeft, TimeUnit.SECONDS);
+        timeLeft.getAndAdd(z);
+        if(timeLeft.get() < 0) timeLeft.set(0);
+        cancelHandler = service.schedule(cancel, timeLeft.get(), TimeUnit.SECONDS);
     }
 
     public void runMole(int s, ImageView curr){
