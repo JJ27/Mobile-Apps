@@ -2,45 +2,60 @@ package com.example.clashroyale;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioAttributes;
 import android.media.Image;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.provider.MediaStore;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     MediaPlayer vp;
     MediaPlayer mp;
+    SoundPool sp;
     GameSurface gs;
     SurfaceView sv;
     Thread gameThread;
+    FrameLayout root;
     volatile boolean running = false;
+    ArrayList<Integer> countdown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FrameLayout root = findViewById(R.id.root);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        root = (FrameLayout) findViewById(R.id.root);
         gs = new GameSurface(this);
         sv = new SurfaceView(this);
         sv.getHolder().addCallback(new SurfaceHolder.Callback() {
@@ -48,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
                 try {
                     vp = MediaPlayer.create(getApplicationContext(), Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.gameplay2), sv.getHolder());
-                } catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 vp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -66,9 +81,9 @@ public class MainActivity extends AppCompatActivity {
                         root.addView(gs);
                         gs.setZOrderOnTop(true);
                         gs.getHolder().setFormat(PixelFormat.TRANSPARENT);
-                        ImageView ig = new ImageView(getApplicationContext());
-                        ig.setImageResource(R.drawable.cr);
-                        root.addView(ig);
+                        //ImageView ig = new ImageView(getApplicationContext());
+                        //ig.setImageResource(R.drawable.cr);
+                        //root.addView(ig);
                         running = true;
                         gameThread = new Thread(gs);
                         gameThread.start();
@@ -95,15 +110,26 @@ public class MainActivity extends AppCompatActivity {
         Runnable t = new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(1000);
+                //try {
+                    //Thread.sleep(1000);
                     mp.start();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                //} catch (InterruptedException e) {
+                    //e.printStackTrace();
+                //}
             }
         };
 
+        AudioAttributes ao = new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build();
+        sp = new SoundPool.Builder().setMaxStreams(10).setAudioAttributes(ao).build();
+        AssetManager am = this.getAssets();
+        countdown = new ArrayList<>();
+        for(int i = 0; i <= 10; i++){
+            try {
+                countdown.add(sp.load(am.openFd(i+"_cd_02.mp3"),1));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -127,56 +153,79 @@ public class MainActivity extends AppCompatActivity {
     public class GameSurface extends SurfaceView implements Runnable, SensorEventListener {
         SurfaceHolder holder = getHolder();
         volatile float step = 0;
-        Bitmap ball;
+        volatile float a = 0;
+        Bitmap ewiz, bg;
         int ballX = 0;
-        Paint paint;
+        Paint paint, rectpaint;
         int screenw;
         int screenh;
         Canvas canvas;
         int boundRight;
         int boundLeft;
-        volatile float a = 0;
+        CountDownTimer timer;
+        String timerText;
+        boolean timerRun = false;
 
 
 
         public GameSurface(Context context) {
             super(context);
             System.out.println("Constructed!");
-            ball = BitmapFactory.decodeResource(getResources(), R.drawable.ball);
+            ewiz = BitmapFactory.decodeResource(getResources(), R.drawable.ewiz);
             Display disp = getWindowManager().getDefaultDisplay();
             Point screenSize = new Point();
             disp.getSize(screenSize);
 
             screenw = screenSize.x;
             screenh = screenSize.y;
+            bg = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.cr), screenw, screenh, true);
 
             paint = new Paint();
-            getHolder().addCallback(new SurfaceHolder.Callback() {
-                @Override
-                public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
+            paint.setColor(Color.WHITE);
+            rectpaint = new Paint();
+            rectpaint.setColor(Color.GRAY);
+            timerText = "0:30";
 
+            timer = new CountDownTimer(31000, 1000) {
+                @Override
+                public void onTick(long l) {
+                    timerText = "0:"+(l/1000);
+                    if((l/100) >= 105 && (l/100) <= 110){
+                        if(mp.isPlaying())
+                            mp.setVolume(0.1f,0.1f);
+                    } if((l/1000) <= 10){
+                        if((l/1000) != 10)
+                            timerText = "0:0"+(l/1000);
+                        sp.play(countdown.get((int)(l/1000)),0.5f,0.5f,1,0,1);
+                        //sp.autoPause();
+                    }
                 }
 
                 @Override
-                public void surfaceChanged(@NonNull SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+                public void onFinish() {
 
                 }
+            };
 
-                @Override
-                public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
-
-                }
-            });
-
+            paint.setTypeface(getResources().getFont(R.font.crfont));
 
             SensorManager sm = (SensorManager) getApplicationContext().getSystemService(SENSOR_SERVICE);
-            Sensor rot = sm.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-            sm.registerListener(this, rot, SensorManager.SENSOR_DELAY_GAME);
+            Sensor rot = sm.getDefaultSensor(Sensor.TYPE_ORIENTATION);
+            sm.registerListener(this, rot, SensorManager.SENSOR_DELAY_FASTEST);
         }
 
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-
+            if(sensorEvent.values[1] == 0)
+                a = 0;
+            else if(sensorEvent.values[1] <= -5)
+                a = -1;
+            else if(sensorEvent.values[1] <= 0)
+                a = -0.5f;
+            else if(sensorEvent.values[1] <= 5)
+                a = 1;
+            else
+                a = 0.5f;
         }
 
         @Override
@@ -188,22 +237,33 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             try {
                 while (running) {
-                    System.out.println("game thread!");
                     if (!holder.getSurface().isValid())
                         continue;
                     Canvas canvas = holder.lockCanvas();
+                    if(!timerRun){
+                        timer.start();
+                        timerRun = true;
+                    }
                     boundLeft = canvas.getClipBounds().left;
                     boundRight = canvas.getClipBounds().right;
                     paint.setTextAlign(Paint.Align.CENTER);
-                    canvas.drawText("Hello World!", (canvas.getWidth() / 2), (int) ((canvas.getHeight() / 2) - ((paint.descent() + paint.ascent()) / 2)), paint);
-                    paint.setTextSize(80);
+                    canvas.drawBitmap(bg, 0,0, null);
+                    canvas.drawRect(200,0,0,100,rectpaint);
+                    if(Integer.parseInt(timerText.substring(2)) >= 30)
+                        timerText = "0:30";
+                    canvas.drawText(timerText, 100,70, paint);
+                    paint.setTextSize(50);
                     System.out.println(step + " " + a);
-                    if (ballX >= screenw / 2 - ball.getWidth() / 2 || ballX <= -1 * screenw / 2 + ball.getWidth() / 2) {
-                        step *= -1;
-                        System.out.println("shift");
-                    }
+                    step += a;
                     ballX += step;
-                    canvas.drawBitmap(ball, (screenw / 2) - ball.getWidth() / 2 + ballX, (screenh / 2) - ball.getHeight(), null);
+                    if (ballX >= screenw / 2 - ewiz.getWidth() / 2) {
+                        step = 0;
+                        ballX = screenw / 2 - ewiz.getWidth() / 2;
+                    } else if(ballX <= -1 * screenw / 2 + ewiz.getWidth() / 2){
+                        step = 0;
+                        ballX = -1 * screenw / 2 + ewiz.getWidth() / 2;
+                    }
+                    canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight(), null);
 
                     holder.unlockCanvasAndPost(canvas);
                 }
