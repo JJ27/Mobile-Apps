@@ -1,4 +1,12 @@
 package com.example.clashroyale;
+/* TODO
+- ADD FIREBALL ENEMY + hit detection
+- For scoring, start the ewiz lower and advance forward each time it dodges fireball
+- Have marks along the right side of the screen for each 'crown'
+    for example, if the ewiz advances enough forward, it gets one crown
+- Do that version of scoring and end the game when time hits zero
+- Then move to diff activity to show final score with # of crowns + sound
+ */
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;

@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_show_waypoint_list.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/src/main/res/layout/activity_show_waypoint_list.xml"
+    },
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_main.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/src/main/res/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/adapter_layout.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/src/main/res/layout/adapter_layout.xml"
+    },
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_sign_in.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/src/main/res/layout/activity_sign_in.xml"
+    },
+    {
+        "merged": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/build/intermediates/incremental/mergeDebugResources/stripped.dir/layout/activity_maps.xml",
+        "source": "/Users/josh/Documents/GitHub/Mobile-Apps/GPSAppA/app/src/main/res/layout/activity_maps.xml"
+    }
+]
