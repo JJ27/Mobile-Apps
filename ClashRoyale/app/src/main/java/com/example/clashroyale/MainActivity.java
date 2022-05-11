@@ -46,6 +46,7 @@ import android.widget.VideoView;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
     MediaPlayer vp;
@@ -115,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
         //gs.getHolder().setFormat(PixelFormat.TRANSPARENT);
 
         mp = MediaPlayer.create(getApplicationContext(), R.raw.sudden_death_01);
+        mp.setVolume(0.9f,0.9f);
         Runnable t = new Runnable() {
             @Override
             public void run() {
@@ -164,7 +166,9 @@ public class MainActivity extends AppCompatActivity {
         volatile float a = 0;
         Bitmap ewiz, bg;
         int ballX = 0;
+        int ballY = -600;
         Paint paint, rectpaint;
+        ArrayList<Obstacle> obstacles;
         int screenw;
         int screenh;
         Canvas canvas;
@@ -183,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
             Display disp = getWindowManager().getDefaultDisplay();
             Point screenSize = new Point();
             disp.getSize(screenSize);
+            obstacles = new ArrayList<Obstacle>();
 
             screenw = screenSize.x;
             screenh = screenSize.y;
@@ -200,18 +205,18 @@ public class MainActivity extends AppCompatActivity {
                     timerText = "0:"+(l/1000);
                     if((l/100) >= 105 && (l/100) <= 110){
                         if(mp.isPlaying())
-                            mp.setVolume(0.1f,0.1f);
+                            mp.setVolume(0.07f,0.07f);
                     } if((l/1000) <= 10){
                         if((l/1000) != 10)
                             timerText = "0:0"+(l/1000);
-                        sp.play(countdown.get((int)(l/1000)),0.5f,0.5f,1,0,1);
+                        sp.play(countdown.get((int)(l/1000)),0.8f,0.8f,1,0,1);
                         //sp.autoPause();
                     }
                 }
 
                 @Override
                 public void onFinish() {
-
+                    mp.stop();
                 }
             };
 
@@ -271,7 +276,19 @@ public class MainActivity extends AppCompatActivity {
                         step = 0;
                         ballX = -1 * screenw / 2 + ewiz.getWidth() / 2;
                     }
-                    canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight(), null);
+                    canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight() - ballY, null);
+                    if(Math.random() * 1000 <= 200){
+                        if(obstacles.size() <= 3)
+                            obstacles.add(new Obstacle(getApplicationContext(), ((int)(Math.random() * 2 * screenw) - 81) - screenw , R.drawable.fireball));
+                    }
+                    for(int i = obstacles.size()-1; i>0; i--){
+                        Obstacle ob = obstacles.get(i);
+                        ob.down();
+                        if((ob.getY()-ob.getImg().getWidth()) <= (-1 * screenh/2)) {
+                            obstacles.remove(ob);
+                        }
+                        canvas.drawBitmap(ob.getImg(), (screenw / 2) - ob.getImg().getWidth() / 2 + ob.getX(), (screenh / 2) - ob.getImg().getHeight() - ob.getY(),null);
+                    }
 
                     holder.unlockCanvasAndPost(canvas);
                 }
