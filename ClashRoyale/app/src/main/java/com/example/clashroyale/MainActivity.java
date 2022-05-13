@@ -140,6 +140,11 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        try {
+            countdown.add(sp.load(am.openFd("fireball_hit_02.wav"),1));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -266,7 +271,6 @@ public class MainActivity extends AppCompatActivity {
                         timerText = "0:30";
                     canvas.drawText(timerText, 100,70, paint);
                     paint.setTextSize(50);
-                    System.out.println(step + " " + a);
                     step += a;
                     ballX += step;
                     if (ballX >= screenw / 2 - ewiz.getWidth() / 2) {
@@ -277,19 +281,24 @@ public class MainActivity extends AppCompatActivity {
                         ballX = -1 * screenw / 2 + ewiz.getWidth() / 2;
                     }
                     canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight() - ballY, null);
-                    if(Math.random() * 1000 <= 200){
-                        if(obstacles.size() <= 3)
-                            obstacles.add(new Obstacle(getApplicationContext(), ((int)(Math.random() * 2 * screenw) - 81) - screenw , R.drawable.fireball));
+                    if(Math.random() * 1000 <= 150) {
+                        if (obstacles.size() <= 2){
+                            obstacles.add(new Obstacle(getApplicationContext(), ((int) (Math.random() * (screenw - (2*81))) - screenw / 2), R.drawable.fireball));
+                        }
                     }
                     for(int i = obstacles.size()-1; i>0; i--){
                         Obstacle ob = obstacles.get(i);
                         ob.down();
                         if((ob.getY()-ob.getImg().getWidth()) <= (-1 * screenh/2)) {
                             obstacles.remove(ob);
+                            ballY += 100;
                         }
+                        System.out.println("ball: " + ballX + " " + ballY);
+                        System.out.println("Obs: " + ob.getX() + " " + ob.getY());
+                        if(ob.checkHit(ballX, ballY))
+                            sp.play(countdown.get(10),0.8f,0.8f,1,0,1);
                         canvas.drawBitmap(ob.getImg(), (screenw / 2) - ob.getImg().getWidth() / 2 + ob.getX(), (screenh / 2) - ob.getImg().getHeight() - ob.getY(),null);
                     }
-
                     holder.unlockCanvasAndPost(canvas);
                 }
             } catch(Exception e){e.printStackTrace();}

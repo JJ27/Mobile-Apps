@@ -14,7 +14,7 @@ public class Obstacle {
     }
 
     public void down(){
-        y -= 15;
+        y -= 10;
     }
 
     public int getY() {
@@ -40,5 +40,11 @@ public class Obstacle {
 
     public Bitmap getImg() {
         return img;
+    }
+
+    public boolean checkHit(int x, int y){
+        if((Math.abs(x - this.x) <= (170)) && Math.abs(y-this.y) <= (170))
+            return true;
+        return false;
     }
 }
