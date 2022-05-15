@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -35,18 +36,25 @@ import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
+
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     MediaPlayer vp;
@@ -58,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     FrameLayout root;
     volatile boolean running = false;
     ArrayList<Integer> countdown;
+    int screenw, screenh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +74,62 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         root = (FrameLayout) findViewById(R.id.root);
+        Display disp = getWindowManager().getDefaultDisplay();
+        Point screenSize = new Point();
+        disp.getSize(screenSize);
+        screenw = screenSize.x;
+        screenh = screenSize.y;
         gs = new GameSurface(this);
         sv = new SurfaceView(this);
+        root.addView(sv);
+        RelativeLayout rl = (RelativeLayout) findViewById(R.id.rl);
+        rl.bringToFront();
+        ImageView load = (ImageView) findViewById(R.id.load);
+        Picasso.with(this).load(R.drawable.loading).resize(600, 200).into(load);
+        load.bringToFront();
+        ProgressBar pb = (ProgressBar) findViewById(R.id.loadbar);
+        pb.setMax(100);
+        pb.setProgress(0);
+        pb.bringToFront();
+        TextView percent = (TextView) findViewById(R.id.percent);
+        percent.setTextSize(40);
+        percent.setText("0%");
+        percent.bringToFront();
+        Thread loading = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    TimeUnit.MILLISECONDS.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        load.setVisibility(View.VISIBLE);
+                        pb.setVisibility(View.VISIBLE);
+                        percent.setVisibility(View.VISIBLE);
+                    }
+                });
+                int perc = 0;
+                for(int i = 0; i < 100; i++){
+                    perc += 1;
+                    int finalPerc = perc;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            pb.incrementProgressBy(1);
+                            percent.setText(finalPerc + "%");
+                        }
+                    });
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(13);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
         sv.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
@@ -80,19 +143,22 @@ public class MainActivity extends AppCompatActivity {
                     public void onPrepared(MediaPlayer mediaPlayer) {
                         mp.start();
                         vp.start();
+                        loading.start();
                     }
                 });
                 vp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mediaPlayer) {
                         vp.stop();
-                        //root.removeView(sv);
+                        pb.setProgress(100);
+                        percent.setText("100%");
+                        //keep this muted root.removeView(sv);
                         root.addView(gs);
                         gs.setZOrderOnTop(true);
-                        gs.getHolder().setFormat(PixelFormat.TRANSPARENT);
-                        //ImageView ig = new ImageView(getApplicationContext());
-                        //ig.setImageResource(R.drawable.cr);
-                        //root.addView(ig);
+                        // and this muted gs.getHolder().setFormat(PixelFormat.TRANSPARENT);
+                        ImageView ig = new ImageView(getApplicationContext());
+                        ig.setImageResource(R.drawable.cr);
+                        root.addView(ig);
                         running = true;
                         gameThread = new Thread(gs);
                         gameThread.start();
@@ -110,9 +176,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        root.addView(sv);
 
-        sv.setZOrderOnTop(true);
+        //sv.setZOrderOnTop(true);
         //gs.getHolder().setFormat(PixelFormat.TRANSPARENT);
 
         mp = MediaPlayer.create(getApplicationContext(), R.raw.sudden_death_01);
@@ -158,11 +223,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
+        /* unmute try {
             gs.resume();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public class GameSurface extends SurfaceView implements Runnable, SensorEventListener {
@@ -174,8 +239,6 @@ public class MainActivity extends AppCompatActivity {
         int ballY = -600;
         Paint paint, rectpaint;
         ArrayList<Obstacle> obstacles;
-        int screenw;
-        int screenh;
         Canvas canvas;
         int boundRight;
         int boundLeft;
@@ -189,13 +252,7 @@ public class MainActivity extends AppCompatActivity {
             super(context);
             System.out.println("Constructed!");
             ewiz = BitmapFactory.decodeResource(getResources(), R.drawable.ewiz);
-            Display disp = getWindowManager().getDefaultDisplay();
-            Point screenSize = new Point();
-            disp.getSize(screenSize);
             obstacles = new ArrayList<Obstacle>();
-
-            screenw = screenSize.x;
-            screenh = screenSize.y;
             bg = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.cr), screenw, screenh, true);
 
             paint = new Paint();
@@ -281,9 +338,9 @@ public class MainActivity extends AppCompatActivity {
                         ballX = -1 * screenw / 2 + ewiz.getWidth() / 2;
                     }
                     canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight() - ballY, null);
-                    if(Math.random() * 1000 <= 150) {
+                    if(Math.random() * 1000 <= 300) {
                         if (obstacles.size() <= 2){
-                            obstacles.add(new Obstacle(getApplicationContext(), ((int) (Math.random() * (screenw - (2*81))) - screenw / 2), R.drawable.fireball));
+                            obstacles.add(new Obstacle(getApplicationContext(), ((int) (Math.random() * (screenw - (2*60))) - screenw / 2), R.drawable.fireball));
                         }
                     }
                     for(int i = obstacles.size()-1; i>0; i--){
@@ -296,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
                         System.out.println("ball: " + ballX + " " + ballY);
                         System.out.println("Obs: " + ob.getX() + " " + ob.getY());
                         if(ob.checkHit(ballX, ballY))
-                            sp.play(countdown.get(10),0.8f,0.8f,1,0,1);
+                            //sp.play(countdown.get(10),0.8f,0.8f,1,0,1);
                         canvas.drawBitmap(ob.getImg(), (screenw / 2) - ob.getImg().getWidth() / 2 + ob.getX(), (screenh / 2) - ob.getImg().getHeight() - ob.getY(),null);
                     }
                     holder.unlockCanvasAndPost(canvas);
