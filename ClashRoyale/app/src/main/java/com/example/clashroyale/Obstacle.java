@@ -17,6 +17,8 @@ public class Obstacle {
         y -= 10;
     }
 
+    public void superdown(){ y -= 20; }
+
     public int getY() {
         return y;
     }
