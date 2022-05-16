@@ -1,6 +1,5 @@
 package com.example.clashroyale;
 /* TODO
-- Redshift ewiz when hit
 - add SUPERDOWN (rage mode w/ sound when screen tapped)
 -
 - Then move to diff activity to show final score with # of crowns + sound
@@ -8,8 +7,12 @@ package com.example.clashroyale;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -29,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -53,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
     Thread gameThread;
     FrameLayout root;
     volatile boolean running = false;
-    ArrayList<Integer> countdown;
-    int screenw, screenh, fireballhitsfx, nearmisssfx;
+    ArrayList<Integer> countdown, ending;
+    int screenw, screenh, fireballhitsfx, nearmisssfx, ragesfx;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
         sp = new SoundPool.Builder().setMaxStreams(2).setAudioAttributes(ao).build();
         AssetManager am = this.getAssets();
         countdown = new ArrayList<>();
+        ending = new ArrayList<>();
         for(int i = 0; i <= 10; i++){
             try {
                 countdown.add(sp.load(am.openFd(i+"_cd_02.mp3"),1));
@@ -199,6 +204,20 @@ public class MainActivity extends AppCompatActivity {
         try {
             fireballhitsfx = sfx.load(am.openFd("fire_ball_explo_02.mp3"),1);
             nearmisssfx = sfx.load(am.openFd("kill_enemy_big_summon_02.mp3"),1);
+            ragesfx = sfx.load(am.openFd("rage_spell_01.mp3"),1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ending.add(-5000);
+        for(int i = 1; i <= 3; i++){
+            try {
+                ending.add(sfx.load(am.openFd(i+"_crown_01.mp3"),1));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            ending.add(sfx.load(am.openFd("scroll_win_02.mp3"),1));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -226,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
         SurfaceHolder holder = getHolder();
         volatile float step = 0;
         volatile float a = 0;
-        Bitmap ewiz, bg, crown;
+        Bitmap ewiz, bg, crown, crownholder, crown2;
         int ballX = 0;
         int ballY = -550;
         Paint paint, rectpaint;
@@ -242,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
         int[] crowndist;
         int crowns;
         Thread hit;
+        boolean ended = true;
 
         public GameSurface(Context context) {
             super(context);
@@ -250,6 +270,8 @@ public class MainActivity extends AppCompatActivity {
             obstacles = new ArrayList<Obstacle>();
             bg = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.cr), screenw, screenh, true);
             crown = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.crown), 100, 80, true);
+            crown2 = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.crown), 150, 120, true);
+            crownholder = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.crownholder), screenw, 350, true);
             crowndist = new int[]{-260, 113, 488, 900};
             crowns = 0;
             paint = new Paint();
@@ -271,13 +293,19 @@ public class MainActivity extends AppCompatActivity {
                                         sfx.autoPause();
                                         sfx.play(fireballhitsfx, 0.8f, 0.8f, 1, 0, 1);
                                         currstrike.add(ob);
-                                        ballY -= 120;
+                                        if(superdown)
+                                            ballY -= 150;
+                                        else
+                                            ballY -= 120;
+                                        ewiz = BitmapFactory.decodeResource(getResources(), R.drawable.ewizburnt);
                                     }
                                 }
                                 if ((ob.getY() - ob.getImg().getWidth()) <= (-1 * screenh / 2)) {
                                     obstacles.remove(ob);
                                     if (!currstrike.contains(ob))
                                         ballY += 100;
+                                    else
+                                        ewiz = BitmapFactory.decodeResource(getResources(), R.drawable.ewiz);
                                 }
                             }
                     }
@@ -313,20 +341,43 @@ public class MainActivity extends AppCompatActivity {
             SensorManager sm = (SensorManager) getApplicationContext().getSystemService(SENSOR_SERVICE);
             Sensor rot = sm.getDefaultSensor(Sensor.TYPE_ORIENTATION);
             sm.registerListener(this, rot, SensorManager.SENSOR_DELAY_FASTEST);
+
+            this.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    superdown = !superdown;
+                    if(superdown)
+                        sfx.play(ragesfx, 1.2f, 1.2f, 1, 0, 1);
+                }
+            });
         }
 
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            if(sensorEvent.values[1] == 0)
-                a = 0;
-            else if(sensorEvent.values[1] <= -5)
-                a = -1.2f;
-            else if(sensorEvent.values[1] <= 0)
-                a = -0.7f;
-            else if(sensorEvent.values[1] <= 5)
-                a = 1.2f;
-            else
-                a = 0.7f;
+            if(!superdown){
+                if(sensorEvent.values[1] == 0)
+                    a = 0;
+                else if(sensorEvent.values[1] <= -5)
+                    a = -1.2f;
+                else if(sensorEvent.values[1] <= 0)
+                    a = -0.7f;
+                else if(sensorEvent.values[1] <= 5)
+                    a = 1.2f;
+                else
+                    a = 0.7f;
+            } else{
+                if(sensorEvent.values[1] == 0)
+                    a = 0;
+                else if(sensorEvent.values[1] <= -5)
+                    a = -1.5f;
+                else if(sensorEvent.values[1] <= 0)
+                    a = -1f;
+                else if(sensorEvent.values[1] <= 5)
+                    a = 1.5f;
+                else
+                    a = 1f;
+            }
+
         }
 
         @Override
@@ -337,60 +388,93 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             try {
-                while (running) {
-                    if (!holder.getSurface().isValid())
-                        continue;
-                    Canvas canvas = holder.lockCanvas();
-                    if(!timerRun){
-                        timer.start();
-                        timerRun = true;
-                        hit.start();
-                    }
-                    boundLeft = canvas.getClipBounds().left;
-                    boundRight = canvas.getClipBounds().right;
-                    paint.setTextAlign(Paint.Align.CENTER);
-                    canvas.drawBitmap(bg, 0,0, null);
-                    canvas.drawRect(200,0,0,100,rectpaint);
-                    canvas.drawBitmap(crown, screenw-100, 150, null);
-                    canvas.drawBitmap(crown, screenw-100, 525, null);
-                    canvas.drawBitmap(crown, screenw-100, 900, null);
-                    if(Integer.parseInt(timerText.substring(2)) >= 30)
-                        timerText = "0:30";
-                    canvas.drawText(timerText, 100,70, paint);
-                    paint.setTextSize(50);
-                    step += a;
-                    ballX += step;
-                    if (ballX >= screenw / 2 - ewiz.getWidth() / 2) {
-                        step = 0;
-                        ballX = screenw / 2 - ewiz.getWidth() / 2;
-                    } else if(ballX <= -1 * screenw / 2 + ewiz.getWidth() / 2){
-                        step = 0;
-                        ballX = -1 * screenw / 2 + ewiz.getWidth() / 2;
-                    }
-                    if(ballY > (screenh/2 - ewiz.getHeight()))
-                        ballY = (screenh/2)-ewiz.getHeight();
-                    canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight() - ballY, null);
-                    if(Math.random() * 1000 <= 300) {
-                        if (obstacles.size() <= ((int)(Math.random()*2 + 1))){
-                            obstacles.add(new Obstacle(getApplicationContext(), ((int) (Math.random() * (screenw - (2*60))) - screenw / 2), R.drawable.fireball));
+                while (true) {
+                    if(running) {
+                        if (!holder.getSurface().isValid())
+                            continue;
+                        Canvas canvas = holder.lockCanvas();
+                        if (!timerRun) {
+                            timer.start();
+                            timerRun = true;
+                            hit.start();
                         }
-                    }
-                    for(int i = obstacles.size()-1; i>0; i--){
-                        Obstacle ob = obstacles.get(i);
-                        if(superdown)
-                            ob.superdown();
-                        else
-                            ob.down();
-                        //System.out.println("ball: " + ballX + " " + ballY);
-                        //System.out.println("Obs: " + ob.getX() + " " + ob.getY());
-                        if(ballY >= crowndist[crowns]) {
-                            crowns += 1;
-                            System.out.println("Crown: " + crowns);
-                            sfx.play(nearmisssfx, 0.8f, 0.8f, 1, 0, 1);
+                        boundLeft = canvas.getClipBounds().left;
+                        boundRight = canvas.getClipBounds().right;
+                        paint.setTextAlign(Paint.Align.CENTER);
+                        canvas.drawBitmap(bg, 0, 0, null);
+                        canvas.drawRect(200, 0, 0, 100, rectpaint);
+                        canvas.drawBitmap(crown, screenw - 100, 150, null);
+                        canvas.drawBitmap(crown, screenw - 100, 525, null);
+                        canvas.drawBitmap(crown, screenw - 100, 900, null);
+                        if (Integer.parseInt(timerText.substring(2)) >= 40)
+                            timerText = "0:40";
+                        canvas.drawText(timerText, 100, 70, paint);
+                        paint.setTextSize(50);
+                        step += a;
+                        ballX += step;
+                        if (ballX >= screenw / 2 - ewiz.getWidth() / 2) {
+                            step = 0;
+                            ballX = screenw / 2 - ewiz.getWidth() / 2;
+                        } else if (ballX <= -1 * screenw / 2 + ewiz.getWidth() / 2) {
+                            step = 0;
+                            ballX = -1 * screenw / 2 + ewiz.getWidth() / 2;
                         }
-                        canvas.drawBitmap(ob.getImg(), (screenw / 2) - ob.getImg().getWidth() / 2 + ob.getX(), (screenh / 2) - ob.getImg().getHeight() - ob.getY(),null);
+                        if (ballY > (screenh / 2 - ewiz.getHeight()))
+                            ballY = (screenh / 2) - ewiz.getHeight();
+                        else if (ballY < (-1*(screenh / 2) + ewiz.getHeight()))
+                            ballY = (-1*(screenh / 2)) + ewiz.getHeight();
+                        canvas.drawBitmap(ewiz, (screenw / 2) - ewiz.getWidth() / 2 + ballX, (screenh / 2) - ewiz.getHeight() - ballY, null);
+                        if (Math.random() * 1000 <= 300) {
+                            if (obstacles.size() <= ((int) (Math.random() * 2 + 1))) {
+                                obstacles.add(new Obstacle(getApplicationContext(), ((int) (Math.random() * (screenw - (2 * 60))) - screenw / 2), R.drawable.fireball));
+                            }
+                        }
+                        for (int i = obstacles.size() - 1; i > 0; i--) {
+                            Obstacle ob = obstacles.get(i);
+                            if (superdown)
+                                ob.superdown();
+                            else
+                                ob.down();
+                            //System.out.println("ball: " + ballX + " " + ballY);
+                            //System.out.println("Obs: " + ob.getX() + " " + ob.getY());
+                            if (ballY >= crowndist[crowns]) {
+                                crowns += 1;
+                                System.out.println("Crown: " + crowns);
+                                sfx.play(nearmisssfx, 0.8f, 0.8f, 1, 0, 1);
+                            }
+                            canvas.drawBitmap(ob.getImg(), (screenw / 2) - ob.getImg().getWidth() / 2 + ob.getX(), (screenh / 2) - ob.getImg().getHeight() - ob.getY(), null);
+                        }
+                        holder.unlockCanvasAndPost(canvas);
+                    } else if (ended){
+                        TimeUnit.MILLISECONDS.sleep(1000);
+                        if (!holder.getSurface().isValid())
+                            continue;
+                        Canvas canvas = holder.lockCanvas();
+                        canvas.drawBitmap(bg, 0, 0, null);
+                        //canvas.drawColor(ContextCompat.getColor(getContext(), R.color.black));
+                        canvas.drawBitmap(crownholder, 0, screenh/2-(350/2),null);
+                        for(int i = 1; i <= crowns; i++){
+                            if(i >= 1)
+                                canvas.drawBitmap(crown2, 167,670, null);
+                            if (i >= 2)
+                                canvas.drawBitmap(crown2, 464,660, null);
+                            if(i == 3)
+                                canvas.drawBitmap(crown2, 759,670, null);
+                            holder.unlockCanvasAndPost(canvas);
+                            canvas = holder.lockCanvas();
+                            canvas.drawBitmap(bg, 0, 0, null);
+                            //canvas.drawColor(ContextCompat.getColor(getContext(), R.color.black));
+                            canvas.drawBitmap(crownholder, 0, screenh/2-(350/2),null);
+                            sfx.autoPause();
+                            sfx.play(ending.get(i),1.0f,1.0f,1,0,1);
+                            TimeUnit.MILLISECONDS.sleep(500);
+                        }
+                        sfx.autoPause();
+                        TimeUnit.MILLISECONDS.sleep(500);
+                        sfx.play(ending.get(4),1.0f,1.0f,1,0,1);
+                        //holder.unlockCanvasAndPost(canvas);
+                        ended = false;
                     }
-                    holder.unlockCanvasAndPost(canvas);
                 }
             } catch(Exception e){e.printStackTrace();}
         }
